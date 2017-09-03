@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="../" />
+    <title>Active 911 HUD</title>
+    <!--
+    <link href="css/materialize.min.css" rel="stylesheet">
+    <link href="css/material-icons.css" rel="stylesheet">
+    -->
+    <style type="text/css">
+        body { background-color: #778899; -webkit-app-region: drag; }
+        #wrapper { -webkit-app-region: drag; }
+        #logo { background-image: url('images/logo-splash.png'); background-repeat: no-repeat; background-position: left top; margin-left: 212px; width: 375px; height: 500px; display: block; overflow: hidden; text-indent: -5000em; -webkit-app-region: drag; }
+        #content-area { width: 400px; height: 100px; position: absolute; left: 100px; bottom: 10px; text-align: center; color: white; -webkit-user-select: none; -webkit-app-region: no-drag; }
+        #status-bar { width: 450px; display: block; margin-left: 75px; margin-top: 40px; }
+        #status-bar span.container { display: block; width: 446px; height: 12px; border: 1px solid black; border-radius: 6px; padding: 2px; }
+        #status-bar span.container span.status { display: block; width: 25%; height: 12px; background-color: #aa0000; border-radius: 4px; }
+        #status-bar p.status-message { text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="logo">Active 911</div>
+        <div id="content-area">
+            <div id="status-bar">
+                <span class="container">
+                    <span class="status"></span>
+                </span>
+                <p class="status-message">Initializing</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
