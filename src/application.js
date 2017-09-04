@@ -10,7 +10,7 @@ let settingsWindow, splashScreen, hudWindow;
 global.active911Settings = require('./lib/active911Settings.js')(app);
 
 function createHUDWindow() {
-    hudWindow = new BrowserWindow({ width: 1920, height: 1080 });
+    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, icon: __dirname + "/images/active911.ico" });
     hudWindow.hide();
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
@@ -27,7 +27,7 @@ function createHUDWindow() {
 }
 
 function createSplashScreen() {
-    splashScreen = new BrowserWindow({ width: 800, height: 600, parent: hudWindow, frame: false });
+    splashScreen = new BrowserWindow({ width: 800, height: 600, parent: hudWindow, frame: false, icon: __dirname + "/images/active911.ico" });
     splashScreen.loadURL("file://" + __dirname + "/views/splash.html");
     splashScreen.on('closed', () => splashScreen = null);
     splashScreen.webContents.on('did-finish-load', () => {
@@ -36,7 +36,7 @@ function createSplashScreen() {
 }
 
 function createSettingsWindow(errorMessage) {
-    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: false });
+    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: false, icon: __dirname + "/images/active911.ico" });
     settingsWindow.hide();
     settingsWindow.errorMessage = errorMessage || false
     settingsWindow.loadURL('file://' + __dirname + '/views/settings.html');

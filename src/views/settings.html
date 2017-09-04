@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Settings</title>
-    <link href="css/materialize.min.css" rel="stylesheet">
-    <link href="css/material-icons.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../node_modules/materialize-css/dist/css/materialize.min.css" />
     <style type="text/css">
         body { padding: 0; margin: 0; background: transparent; }
     </style>
@@ -15,61 +14,61 @@
         const active911Settings = remote.getGlobal('active911Settings');
 
         window.$ = window.jQuery = require('jquery');
+        require('hammerjs');
+        require('materialize-css');
     </script>
 </head>
 <body>
-<form id="iar-auth">
+<form>
     <div class="card horizontal grey lighten-5">
         <div class="card-image">
-            <img src="images/login-logo.png" />
+            <img src="images/logo-splash.png" />
         </div>
         <div class="card-stacked">
             <div class="card-content">
-                <span class="card-title red-text darken-2">Monitor Login</span>
+                <span class="card-title red-text darken-2">HUD Settings</span>
                 <div class="card-panel red darken-2 white-text" id="error-wrapper" style="display: none;">
                     <i class="material-icons left">error_outline</i>
                     <span id="error-message"></span>
                 </div>
                 <div class="input-field">
-                    <input type="text" id="agency" />
-                    <label for="agency">Agency</label>
+                    <input type="text" id="accessToken" />
+                    <label for="accessToken">Access Token</label>
                 </div>
                 <div class="input-field">
-                    <input type="text" id="username" />
-                    <label for="username">Username</label>
-                </div>
-                <div class="input-field">
-                    <input type="password" id="password" />
-                    <label for="password">Password</label>
-                </div>
-
-                <div class="input-field">
-                    <input type="checkbox" id="autostart" />
-                    <label for="autostart">Auto-start on system login</label>
+                    <input type="text" id="refreshToken" />
+                    <label for="refreshToken">Refresh Token</label>
                 </div>
             </div>
             <div class="card-action">
-                <button class="btn waves-effect waves-green" id="doLogin">
-                    Login
-                    <i class="material-icons right">launch</i>
+                <button class="btn waves-effect waves-blue" id="refresh">
+                    Refresh Token
+                    <i class="material-icons right">refresh</i>
+                </button>
+                <button class="btn waves-effect waves-green" id="save">
+                    Save
+                    <i class="material-icons right">save</i>
                 </button>
             </div>
         </div>
     </div>
 </form>
 <script type="text/javascript">
+    $('#exit').on('click', () => {
+        let win = remote.getCurrentWindow();
+        win.close();
+    });
+    ipcRenderer.on('show-login-error', (evt, message) => {
+        $('#error-message').html(message);
+        $('#error-wrapper').show();
+    });
+    $('#save').on('click', (e) => {
+    });
+
+    /*
     $('#agency').val(iarSettings.get('auth.agency'));
     $('#username').val(iarSettings.get('auth.username'));
     $('#password').val(iarSettings.get('auth.password'));
-
-    if (iarSettings.get('general.autostart') == true) {
-        $('#autostart').prop('checked', true);
-    }
-
-    $('#exit').on('click', () => {
-        var win = remote.getCurrentWindow();
-        win.close();
-    });
 
     $('#doLogin').on('click', (e) => {
         e.preventDefault();
@@ -81,11 +80,7 @@
 
         ipcRenderer.send('settings-saved');
     });
-
-    ipcRenderer.on('show-login-error', (evt, message) => {
-        $('#error-message').html(message);
-        $('#error-wrapper').show();
-    });
+    */
 </script>
 </body>
 </html>
