@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="../" />
+    <title>Settings</title>
+    <link href="css/materialize.min.css" rel="stylesheet">
+    <link href="css/material-icons.css" rel="stylesheet">
+    <style type="text/css">
+        body { padding: 0; margin: 0; background: transparent; }
+    </style>
+    <script>
+        const remote = require('electron').remote;
+        const ipcRenderer = require('electron').ipcRenderer;
+        const active911Settings = remote.getGlobal('active911Settings');
+
+        window.$ = window.jQuery = require('jquery');
+    </script>
+</head>
+<body>
+<form id="iar-auth">
+    <div class="card horizontal grey lighten-5">
+        <div class="card-image">
+            <img src="images/login-logo.png" />
+        </div>
+        <div class="card-stacked">
+            <div class="card-content">
+                <span class="card-title red-text darken-2">Monitor Login</span>
+                <div class="card-panel red darken-2 white-text" id="error-wrapper" style="display: none;">
+                    <i class="material-icons left">error_outline</i>
+                    <span id="error-message"></span>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="agency" />
+                    <label for="agency">Agency</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="username" />
+                    <label for="username">Username</label>
+                </div>
+                <div class="input-field">
+                    <input type="password" id="password" />
+                    <label for="password">Password</label>
+                </div>
+
+                <div class="input-field">
+                    <input type="checkbox" id="autostart" />
+                    <label for="autostart">Auto-start on system login</label>
+                </div>
+            </div>
+            <div class="card-action">
+                <button class="btn waves-effect waves-green" id="doLogin">
+                    Login
+                    <i class="material-icons right">launch</i>
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $('#agency').val(iarSettings.get('auth.agency'));
+    $('#username').val(iarSettings.get('auth.username'));
+    $('#password').val(iarSettings.get('auth.password'));
+
+    if (iarSettings.get('general.autostart') == true) {
+        $('#autostart').prop('checked', true);
+    }
+
+    $('#exit').on('click', () => {
+        var win = remote.getCurrentWindow();
+        win.close();
+    });
+
+    $('#doLogin').on('click', (e) => {
+        e.preventDefault();
+        iarSettings.set('auth.agency', $('#agency').val())
+            .set('auth.username', $('#username').val())
+            .set('auth.password', $('#password').val())
+            .set('general.autostart', $('#autostart').prop('checked'))
+            .save();
+
+        ipcRenderer.send('settings-saved');
+    });
+
+    ipcRenderer.on('show-login-error', (evt, message) => {
+        $('#error-message').html(message);
+        $('#error-wrapper').show();
+    });
+</script>
+</body>
+</html>

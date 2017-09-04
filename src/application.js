@@ -7,7 +7,7 @@ const remote = electron.remote;
 const fs = require('graceful-fs');
 let settingsWindow, splashScreen, hudWindow;
 
-// global.active911Settings = require('lib/settings.js')(app);
+global.active911Settings = require('./lib/active911Settings.js')(app);
 
 function createHUDWindow() {
     hudWindow = new BrowserWindow({ width: 1920, height: 1080 });
@@ -35,7 +35,7 @@ function createSplashScreen() {
     });
 }
 
-function createSettingsWindow() {
+function createSettingsWindow(errorMessage) {
     settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: false });
     settingsWindow.hide();
     settingsWindow.errorMessage = errorMessage || false
@@ -71,13 +71,13 @@ ipcMain.on('show-settings-window', () => {
     createSettingsWindow();
 });
 ipcMain.on('active911-auth-complete', () => {
-    createHUDWindow();
+    // createHUDWindow();
 });
 ipcMain.on('settings-saved', () => {
     if (!hudWindow || hudWindow.isHidden()) {
         settingsWindow.close();
         splashScreen.show();
-        splashScreen.send('continue-login');
+        splashScreen.send('settings-saved');
     } else {
         // Reinitialize with new settings
         hudWindow.close();

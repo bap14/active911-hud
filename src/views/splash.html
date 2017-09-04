@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Active 911 HUD</title>
-    <!--
-    <link href="css/materialize.min.css" rel="stylesheet">
-    <link href="css/material-icons.css" rel="stylesheet">
-    -->
+    <script>
+        const remote = require('electron').remote;
+        const ipcRenderer = require('electron').ipcRenderer;
+        window.$ = window.jQuery = require('jquery');
+        var active911Settings = remote.getGlobal('active911Settings');
+    </script>
     <style type="text/css">
         body { background-color: #778899; -webkit-app-region: drag; }
         #wrapper { -webkit-app-region: drag; }
@@ -15,7 +17,7 @@
         #content-area { width: 400px; height: 100px; position: absolute; left: 100px; bottom: 10px; text-align: center; color: white; -webkit-user-select: none; -webkit-app-region: no-drag; }
         #status-bar { width: 450px; display: block; margin-left: 75px; margin-top: 40px; }
         #status-bar span.container { display: block; width: 446px; height: 12px; border: 1px solid black; border-radius: 6px; padding: 2px; }
-        #status-bar span.container span.status { display: block; width: 25%; height: 12px; background-color: #aa0000; border-radius: 4px; }
+        #status-bar span.container span.status { display: block; width: 1%; height: 12px; background-color: #aa0000; border-radius: 4px; }
         #status-bar p.status-message { text-align: center; }
     </style>
 </head>
@@ -31,5 +33,30 @@
             </div>
         </div>
     </div>
+    <script>
+        function updateStatusMessage(message, barWidth) {
+            if (typeof barWidth !== "undefined" && barWidth >= 0 && barWidth <= 100) {
+                $('#status-bar > .container > .status').animate({width: barWidth + '%'}, 250);
+            }
+
+            $('#status-message').html(message);
+        }
+
+        ipcRenderer.on('main-window-ready', () => {
+            updateStatusMessage("Launching &hellip;", 100);
+            ipcRenderer.send('splash-complete');
+        });
+
+        $(document).ready(function () {
+            updateStatusMessage('Initializing &hellip;', 25);
+            if (active911Settings.hasOauthToken()) {
+                updateStatusMessage('Starting Up &hellip;', 90);
+                ipcRenderer.send('show-main-window');
+            } else {
+                updateStatusMessage('')
+                ipcRenderer.send('show-settings-window');
+            }
+        })
+    </script>
 </body>
 </html>
