@@ -5,9 +5,14 @@ const BrowserWindow = electron.BrowserWindow;
 const ipcMain = electron.ipcMain;
 const remote = electron.remote;
 const fs = require('graceful-fs');
-let settingsWindow, splashScreen, hudWindow;
+let settingsWindow, splashScreen, hudWindow, oauthWindow, appIcon = __dirname + "/images/active911.ico";
+
+if (require('os').platform() === "darwin") {
+    appIcon = __dirname + "/images/active911.icns";
+}
 
 global.active911Settings = require('./lib/active911Settings.js')(app);
+global.active911 = require('./lib/active911.js')(global.active911Settings);
 
 function createHUDWindow() {
     hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, icon: __dirname + "/images/active911.ico" });
@@ -17,8 +22,8 @@ function createHUDWindow() {
         hudWindow.show();
 
         if (splashScreen) {
-            let splashScreenBounds = splashScreen.getBounds();
-            hudWindow.setBounds(splashScreenBounds);
+            // let splashScreenBounds = splashScreen.getBounds();
+            // hudWindow.setBounds(splashScreenBounds);
             splashScreen.close();
         }
     });
@@ -26,8 +31,19 @@ function createHUDWindow() {
     hudWindow.on('closed', () => hudWindow = null);
 }
 
+function createOauthWindow(authUri) {
+    oauthWindow = new BrowserWindow({ width: 640, height: 480, parent: hudWindow, frame: false, icon: appIcon });
+    oauthWindow.loadURL(authUri);
+    oauthWindow.on("closed", () => oauthWindow = null);
+    oauthWindow.webContents.on("did-finish-load", () => {
+        console.log(oauthWindow);
+        console.log(oauthWindow.webContents);
+        console.log(oauthWindow.webContents.getURL());
+    });
+}
+
 function createSplashScreen() {
-    splashScreen = new BrowserWindow({ width: 800, height: 600, parent: hudWindow, frame: false, icon: __dirname + "/images/active911.ico" });
+    splashScreen = new BrowserWindow({ width: 800, height: 600, parent: hudWindow, frame: false, icon: appIcon });
     splashScreen.loadURL("file://" + __dirname + "/views/splash.html");
     splashScreen.on('closed', () => splashScreen = null);
     splashScreen.webContents.on('did-finish-load', () => {
@@ -36,7 +52,7 @@ function createSplashScreen() {
 }
 
 function createSettingsWindow(errorMessage) {
-    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: false, icon: __dirname + "/images/active911.ico" });
+    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: false, icon: appIcon });
     settingsWindow.hide();
     settingsWindow.errorMessage = errorMessage || false
     settingsWindow.loadURL('file://' + __dirname + '/views/settings.html');
@@ -49,7 +65,7 @@ function createSettingsWindow(errorMessage) {
         }
 
         if (splashScreen) {
-            splashScreen.hide();
+            //splashScreen.hide();
         }
     });
 }
@@ -69,6 +85,9 @@ app.on('activate', () => {
 });
 ipcMain.on('show-settings-window', () => {
     createSettingsWindow();
+});
+ipcMain.on('oauth-authorize', (authUrl) => {
+    createOauthWindow(authUrl);
 });
 ipcMain.on('active911-auth-complete', () => {
     // createHUDWindow();

@@ -33,14 +33,35 @@ module.exports = function () {
         return value === undefined ? defaultValue : value;
     };
 
+    active911Settings.prototype.getOauthToken = function () {
+        if (this.config && this.config.active911auth) {
+            return this.config.active911auth;
+        }
+
+        return false;
+    };
+
     active911Settings.prototype.hasOauthToken = function () {
         var returnValue = false;
 
-        if (this.config && this.config.active911auth && this.config.active911auth.token) {
+        if (
+            this.config &&
+            this.config.active911auth &&
+            this.config.active911auth.access_token &&
+            this.config.active911auth.refresh_token
+        ) {
             returnValue = true;
         }
 
         return returnValue;
+    };
+
+    active911Settings.prototype.setOauthToken = function (token) {
+        if (!this.config) {
+            this.config = {};
+        }
+
+        this.config.active911auth = token;
     };
 
     return new active911Settings();

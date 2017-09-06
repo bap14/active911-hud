@@ -8,7 +8,8 @@
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
         window.$ = window.jQuery = require('jquery');
-        var active911Settings = remote.getGlobal('active911Settings');
+        let active911Settings = remote.getGlobal('active911Settings');
+        let active911 = remote.getGlobal('active911');
     </script>
     <style type="text/css">
         body { background-color: #778899; -webkit-app-region: drag; }
@@ -17,7 +18,7 @@
         #content-area { width: 400px; height: 100px; position: absolute; left: 100px; bottom: 10px; text-align: center; color: white; -webkit-user-select: none; -webkit-app-region: no-drag; }
         #status-bar { width: 450px; display: block; margin-left: 75px; margin-top: 40px; }
         #status-bar span.container { display: block; width: 446px; height: 12px; border: 1px solid black; border-radius: 6px; padding: 2px; }
-        #status-bar span.container span.status { display: block; width: 1%; height: 12px; background-color: #aa0000; border-radius: 4px; }
+        #status-bar span.container span.status { display: block; width: 0; height: 12px; background-color: #aa0000; border-radius: 4px; }
         #status-bar p.status-message { text-align: center; }
     </style>
 </head>
@@ -27,16 +28,16 @@
         <div id="content-area">
             <div id="status-bar">
                 <span class="container">
-                    <span class="status"></span>
+                    <span class="status">Initializing &hellip;</span>
                 </span>
-                <p class="status-message">Initializing</p>
+                <p class="status-message"></p>
             </div>
         </div>
     </div>
     <script>
         function updateStatusMessage(message, barWidth) {
             if (typeof barWidth !== "undefined" && barWidth >= 0 && barWidth <= 100) {
-                $('#status-bar > .container > .status').animate({width: barWidth + '%'}, 250);
+                $('#status-bar > .container > .status').animate({width: barWidth + '%'}, 200);
             }
 
             $('#status-message').html(message);
@@ -49,13 +50,18 @@
 
         $(document).ready(function () {
             updateStatusMessage('Initializing &hellip;', 25);
+
+            active911.validateToken();
+
+            /*
             if (active911Settings.hasOauthToken()) {
                 updateStatusMessage('Starting Up &hellip;', 90);
                 ipcRenderer.send('show-main-window');
             } else {
-                updateStatusMessage('')
+                updateStatusMessage('');
                 ipcRenderer.send('show-settings-window');
             }
+            */
         })
     </script>
 </body>
