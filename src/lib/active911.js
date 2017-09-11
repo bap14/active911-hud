@@ -20,7 +20,33 @@ module.exports = function (active911Settings) {
     let Active911 = function () {
         // active911Settings = app.getGlobal('active911Settings');
         oauth2 = require('simple-oauth2').create(credentials);
-    }
+    };
+
+    Active911.prototype.parseURI = function (str, options) {
+        let o = Object.assign({
+                    strictMode: false,
+                    key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path",
+                            "directory","file","query","anchor"],
+                    q: {
+                        name:   "queryKey",
+                        parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+                    },
+                    parser: {
+                        strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+                        loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+                    }
+                }, options || {}),
+            m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
+            uri = {},
+            i = 14;
+
+        while (i--) uri[o.key[i]] = m[i] || "";
+        uri[o.q.name] = {};
+        uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
+            if ($1) uri[o.q.name][$1] = $2;
+        });
+        return uri;
+    };
 
     Active911.prototype.validateToken = function () {
         if (active911Settings.hasOauthToken()) {
@@ -32,13 +58,11 @@ module.exports = function (active911Settings) {
             });
         }
         else {
-            console.log('Oauth token not found, starting authorization');
             // Start auth workflow
             const authorizationUri = oauth2.authorizationCode.authorizeURL({
-                client_id: credentials.client.id,
                 response_type: "code",
                 redirection_uri: 'http://localhost:3000/callback',
-                scope: 'read_agency,read_alert,read_response,read_device,read_mapdata'
+                scope: 'read_agency read_alert read_response read_device read_mapdata'
             });
 
             ipcMain.emit('oauth-authorize', authorizationUri);

@@ -36,9 +36,10 @@ function createOauthWindow(authUri) {
     oauthWindow.loadURL(authUri);
     oauthWindow.on("closed", () => oauthWindow = null);
     oauthWindow.webContents.on("did-finish-load", () => {
-        console.log(oauthWindow);
-        console.log(oauthWindow.webContents);
-        console.log(oauthWindow.webContents.getURL());
+        if (/:\/\/winfieldvfd\.org\//.test(oauthWindow.getURL())) {
+            let uri = active911.parseURI(oauthWindow.getURL());
+            console.log(uri);
+        }
     });
 }
 
