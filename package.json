@@ -1,35 +1,38 @@
 {
   "name": "active-911-hud",
   "version": "0.0.1",
-  "main": "src/application.js",
+  "main": "app/application.js",
   "license": "Apache-2.0",
   "description": "A friendly Heads Up Display (HUD) for viewing current call details and response status of personnel",
-  "repository": {
-    "type": "git",
-    "url": "git://bitbucket.org/winfieldvfd/active-911.git"
-  },
-  "author": "Brett Patterson",
-  "bugs": {
-    "url": "https://bitbucket.org/winfieldvfd/active-911/issues"
+  "author": "Brett P <bap14@users.noreply.github.com>",
+  "build": {
+    "appId": "com.github.users.noreply.bap14.active-911-hud",
+    "productName": "Active 911 HUD",
+    "copyright": "Copyright © 2017 ${author}",
+    "windows": {
+      "target": "nsis",
+      "icon": "build/icons/active911.ico"
+    },
+    "nsis": {
+      "installerIcon": "build/icons/active911.ico",
+      "uninstallerIcon": "build/icons/active911.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icons/active911.icns"
+    },
+    "dmg": {
+      "background": "",
+      "backgroundColor": "#778899"
+    }
   },
   "scripts": {
-    "start": "electron $NODE_DEBUG_OPTION ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "keywords": [
-    "active911",
-    "active",
-    "911",
-    "HUD"
-  ],
-  "engines": {
-    "node": ">=6.11.2"
-  },
-  "dependencies": {
-    "electron": "^1.8.0",
-    "graceful-fs": "^4.1.11",
-    "hammerjs": "^2.0.8",
-    "jquery": "^3.2.1",
-    "materialize-css": "^0.100.2",
-    "simple-oauth2": "^1.3.0"
+  "postinstall": "electron-builder install-app-deps",
+  "devDependencies": {
+    "electron-builder": "^19.27.7"
   }
 }

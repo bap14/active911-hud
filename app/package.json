@@ -1,0 +1,32 @@
+{
+  "name": "active-911-hud",
+  "version": "0.0.1",
+  "main": "application.js",
+  "license": "Apache-2.0",
+  "description": "A friendly Heads Up Display (HUD) for viewing current call details and response status of personnel",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bap14/active-911-hud.git"
+  },
+  "author": "Brett P <bap14@users.noreply.github.com>",
+  "bugs": {
+    "url": "https://github.com/bap14/active-911-hud/issues"
+  },
+  "keywords": [
+    "active911",
+    "active",
+    "911",
+    "HUD"
+  ],
+  "engines": {
+    "node": ">=6.11.2"
+  },
+  "dependencies": {
+    "electron": "^1.8.0",
+    "graceful-fs": "^4.1.11",
+    "hammerjs": "^2.0.8",
+    "jquery": "^3.2.1",
+    "materialize-css": "^0.100.2",
+    "simple-oauth2": "^1.3.0"
+  }
+}

@@ -1,4 +1,11 @@
 "use strict";
+var path = require('path'),
+    devMode = (process.argv || []).indexOf('--dev') !== -1;
+if (devMode) {
+    var PATH_APP_NODE_MODULES = path.join(__dirname, '..', 'app', 'node_modules');
+    require('module').globalPaths.push(PATH_APP_NODE_MODULES);
+}
+
 const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -32,15 +39,22 @@ function createHUDWindow() {
 }
 
 function createOauthWindow(authUri) {
-    oauthWindow = new BrowserWindow({ width: 640, height: 480, parent: hudWindow, frame: false, icon: appIcon });
-    oauthWindow.loadURL(authUri);
+    oauthWindow = new BrowserWindow({ width: 755, height: 550, parent: hudWindow, frame: false, icon: appIcon });
+    //oauthWindow.loadURL(authUri);
+    oauthWindow.loadURL('file://' + __dirname + '/views/oauth.html');
+    oauthWindow.webContents.on('did-finish-load', ()  => {
+        oauthWindow.openDevTools();
+        oauthWindow.send('load-oauth-url', { url: authUri });
+    });
     oauthWindow.on("closed", () => oauthWindow = null);
+    /*
     oauthWindow.webContents.on("did-finish-load", () => {
         if (/:\/\/winfieldvfd\.org\//.test(oauthWindow.getURL())) {
             let uri = active911.parseURI(oauthWindow.getURL());
             console.log(uri);
         }
     });
+    */
 }
 
 function createSplashScreen() {

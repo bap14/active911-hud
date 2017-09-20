@@ -7,13 +7,18 @@ module.exports = function () {
     
     var active911Settings = function (filePath) {
         if (typeof filePath === "undefined" || !filePath) {
-            var filePath = "settings.json";
+            filePath = "settings.json";
+        }
+
+        // Ensure userData path is available for writing
+        if (!fs.existsSync(app.getPath("userData"))) {
+            fs.mkdirSync(app.getPath("userData"), 644);
         }
 
         this.configFilePath = app.getPath("userData") + "/" + filePath;
 
         if (!util.exists(this.configFilePath)) {
-            fs.writeFileSync(this.configFilePath, '{}');
+            fs.writeFileSync(this.configFilePath, "{}");
         }
 
         this.config = JSON.parse(fs.readFileSync(this.configFilePath));
