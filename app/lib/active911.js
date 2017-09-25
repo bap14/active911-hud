@@ -14,12 +14,30 @@ module.exports = function (active911Settings) {
                 authorizePath: '/interface/open_api/authorize_agency.php'
             }
         },
+        oauthScope = 'read_agency read_alert read_response read_device read_mapdata',
         oauth2,
         token;
 
     let Active911 = function () {
         // active911Settings = app.getGlobal('active911Settings');
         oauth2 = require('simple-oauth2').create(credentials);
+    };
+
+    Active911.prototype.exchangeAuthToken = function (accessToken) {
+        oauth2.authorizationCode.getToken({
+            grant_type: "authorization_code",
+            scope: oauthScope,
+            code: accessToken
+        })
+        .then((result) => {
+            token = oauth2.accessToken.create(result);
+            active911Settings.setOauthToken(token).save();
+
+            ipcMain.send('oauth-complete');
+        })
+        .catch((error) => {
+            ipcMain.send('oauth-error', [ error ]);
+        });
     };
 
     Active911.prototype.parseURI = function (str, options) {
@@ -62,7 +80,7 @@ module.exports = function (active911Settings) {
             const authorizationUri = oauth2.authorizationCode.authorizeURL({
                 response_type: "code",
                 redirection_uri: 'http://localhost:3000/callback',
-                scope: 'read_agency read_alert read_response read_device read_mapdata'
+                scope: oauthScope
             });
 
             ipcMain.emit('oauth-authorize', authorizationUri);

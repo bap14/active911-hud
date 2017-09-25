@@ -40,21 +40,12 @@ function createHUDWindow() {
 
 function createOauthWindow(authUri) {
     oauthWindow = new BrowserWindow({ width: 755, height: 550, parent: hudWindow, frame: false, icon: appIcon });
-    //oauthWindow.loadURL(authUri);
     oauthWindow.loadURL('file://' + __dirname + '/views/oauth.html');
     oauthWindow.webContents.on('did-finish-load', ()  => {
         oauthWindow.openDevTools();
         oauthWindow.send('load-oauth-url', { url: authUri });
     });
     oauthWindow.on("closed", () => oauthWindow = null);
-    /*
-    oauthWindow.webContents.on("did-finish-load", () => {
-        if (/:\/\/winfieldvfd\.org\//.test(oauthWindow.getURL())) {
-            let uri = active911.parseURI(oauthWindow.getURL());
-            console.log(uri);
-        }
-    });
-    */
 }
 
 function createSplashScreen() {
@@ -103,6 +94,13 @@ ipcMain.on('show-settings-window', () => {
 });
 ipcMain.on('oauth-authorize', (authUrl) => {
     createOauthWindow(authUrl);
+});
+ipcMain.on('oauth-error', (error) => {
+    console.error(error);
+});
+ipcMain.on('oauth-complete', () => {
+    oauthWindow.close();
+    splashScreen.send('oauth-complete');
 });
 ipcMain.on('active911-auth-complete', () => {
     // createHUDWindow();

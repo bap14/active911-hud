@@ -36,7 +36,11 @@
         $('#oauth-window').on('load', () => {
             if (/:\/\/(?:www\.)?winfieldvfd\.org\//.test($('#oauth-window')[0].contentWindow.location.href)) {
                 let uri = active911.parseURI($('#oauth-window')[0].contentWindow.location.href);
-                console.log(uri);
+                if (uri && uri.queryKey && uri.queryKey.code) {
+                    active911.exchangeAuthToken(uri.queryKey.code);
+                } else {
+                    ipcMain.send('oauth-error');
+                }
             }
         });
     });

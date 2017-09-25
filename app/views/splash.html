@@ -48,20 +48,15 @@
             ipcRenderer.send('splash-complete');
         });
 
+        ipcRenderer.on('oauth-complete', () => {
+            updateStatusMessage("Loading HUD &hellip;", 75);
+            ipcRenderer.send('load-hud');
+        });
+
         $(document).ready(function () {
             updateStatusMessage('Initializing &hellip;', 25);
 
             active911.validateToken();
-
-            /*
-            if (active911Settings.hasOauthToken()) {
-                updateStatusMessage('Starting Up &hellip;', 90);
-                ipcRenderer.send('show-main-window');
-            } else {
-                updateStatusMessage('');
-                ipcRenderer.send('show-settings-window');
-            }
-            */
         })
     </script>
 </body>
