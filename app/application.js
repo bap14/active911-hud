@@ -12,9 +12,10 @@ const BrowserWindow = electron.BrowserWindow;
 const ipcMain = electron.ipcMain;
 const remote = electron.remote;
 const fs = require('graceful-fs');
+const os = require('os');
 let settingsWindow, splashScreen, hudWindow, oauthWindow, appIcon = __dirname + "/images/active911.ico";
 
-if (require('os').platform() === "darwin") {
+if (os.platform().toLowerCase() === "darwin") {
     appIcon = __dirname + "/images/active911.icns";
 }
 
@@ -89,8 +90,13 @@ app.on('activate', () => {
         createHUDWindow();
     }
 });
+
 ipcMain.on('show-settings-window', () => {
     createSettingsWindow();
+});
+
+ipcMain.on('check-oauth', () => {
+    active911.validateToken();
 });
 ipcMain.on('oauth-authorize', (authUrl) => {
     createOauthWindow(authUrl);

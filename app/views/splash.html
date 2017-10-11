@@ -55,8 +55,7 @@
 
         $(document).ready(function () {
             updateStatusMessage('Initializing &hellip;', 25);
-
-            active911.validateToken();
+            ipcRenderer.send('check-oauth');
         })
     </script>
 </body>
