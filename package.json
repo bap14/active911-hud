@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "description": "A friendly Heads Up Display (HUD) for viewing current call details and response status of personnel",
   "author": "Brett P <bap14@users.noreply.github.com>",
+  "repository": "",
   "build": {
     "appId": "com.github.users.noreply.bap14.active-911-hud",
     "productName": "Active 911 HUD",
@@ -33,6 +34,8 @@
   },
   "postinstall": "electron-builder install-app-deps",
   "devDependencies": {
-    "electron-builder": "^19.27.7"
+    "electron-builder": "^19.27.7",
+    "less": "^2.7.3",
+    "less-plugin-clean-css": "^1.5.1"
   }
 }

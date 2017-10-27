@@ -50,7 +50,7 @@ function createOauthWindow(authUri) {
 }
 
 function createSplashScreen() {
-    splashScreen = new BrowserWindow({ width: 800, height: 600, parent: hudWindow, frame: false, icon: appIcon });
+    splashScreen = new BrowserWindow({ width: 460, height: 226, parent: hudWindow, frame: false, icon: appIcon });
     splashScreen.loadURL("file://" + __dirname + "/views/splash.html");
     splashScreen.on('closed', () => splashScreen = null);
     splashScreen.webContents.on('did-finish-load', () => {
