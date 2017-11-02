@@ -28,11 +28,11 @@
     }
   },
   "scripts": {
+    "install": "electron-builder install-app-deps",
     "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },
-  "postinstall": "electron-builder install-app-deps",
   "devDependencies": {
     "electron-builder": "^19.27.7",
     "less": "^2.7.3",
