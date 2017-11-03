@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><head><link rel="stylesheet" href="/main.css"></head><body><h1>Active 911 HUD Authorization</h1>
+
+<p>Authorization for <em>Active 911 HUD</em> to connect to Active911 has been granted.  Please <a href="active911hud://oauth=" id="hud-opener">launch Active911 HUD</a> now.</p>
+<script type="text/javascript">
+    const qs = (function(a) {
+        if (a == "") return {};
+        var b = {};
+        for (var i=0; i<a.length; i++){
+            var p=a[i].split('=', 2);
+            b[p[0]] = p.length === 1 ? '' : decodeURIComponent(p[1].replace(/\+/g, ' '));
+        }
+        return b;
+    })(window.location.search.substr(1).split('&'));
+
+    var link = document.getElementById('hud-opener');
+    link.href = link.href + qs['token'];
+</script></body></html>
