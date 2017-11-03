@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <base href="../" />
-    <title>Active 911 HUD</title>
+    <title>Authorization - Active 911 HUD</title>
+    <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
@@ -11,16 +12,8 @@
         let active911Settings = remote.getGlobal('active911Settings');
         let active911 = remote.getGlobal('active911');
     </script>
-    <style type="text/css">
-        body { background-color: white; -webkit-app-region: no-drag; }
-        #wrapper { -webkit-app-region: drag; }
-        #logo { background-color: #778899; background-image: url('images/logo-splash.png'); background-repeat: no-repeat; background-position: 10px 4px; background-size: auto 32px; height: 32px; width: 657px; margin-left: -8px; margin-top: -8px; padding: 4px 8px 4px 90px; display: block; -webkit-app-region: drag; }
-        #logo h2 { line-height: 32px; margin: 0; padding: 0; color: white; }
-        #content-area { height: 500px; -webkit-user-select: none; -webkit-app-region: no-drag; }
-        #oauth-window { border: none; width: 100%; height: 500px; }
-    </style>
 </head>
-<body>
+<body class="oauth-window">
 <div id="wrapper">
     <div id="logo"><h2>Active 911 Authorization</h2></div>
     <div id="content-area">

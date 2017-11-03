@@ -1,0 +1,87 @@
+body.splash-window {
+  background-color: #778899;
+  margin: 0;
+  -webkit-app-region: drag;
+
+  #wrapper {
+    overflow: hidden;
+    padding: 10px 10px 16px 170px;
+    position: relative;
+    height: 200px;
+    width: 280px;
+    -webkit-app-region: drag;
+
+    #logo {
+      background: transparent url('../images/logo-splash.png') no-repeat left top;
+
+      display: inline-block;
+      float: left;
+      margin-left: -160px;
+      overflow: hidden;
+      text-indent: -5000em;
+
+      height: 200px;
+      width: 150px;
+
+      -webkit-app-region: drag;
+    }
+
+    #content-area {
+      height: 200px;
+      width: 100%;
+
+      overflow: hidden;
+
+      -webkit-user-select: none;
+      -webkit-app-region: no-drag;
+
+      ul#console {
+        background: #333333;
+        list-style: none;
+        margin: 0;
+        padding: 8px;
+        display: block;
+        position: relative;
+        height: 184px;
+
+        li {
+          color: white;
+          padding: 6px 0;
+        }
+      }
+    }
+
+    #status-bar {
+      height: 6px;
+      width: 0%;
+
+      bottom: 0;
+      left: 0;
+      position: absolute;
+
+      overflow: hidden;
+
+      .fill-bar {
+        animation: LightBar 35s linear 100000;
+        background: linear-gradient(45deg, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff, #ff0000, #0000ff);
+        background-size: 2000% 100%;
+        display: block;
+
+        height: 6px;
+        width: 460px;
+
+        @keyframes LightBar {
+          0% {
+            background-position: 0 50%
+          }
+          50% {
+            background-position: 100% 50%
+          }
+          100% {
+            background-position: 0 50%
+          }
+        }
+      }
+    }
+  }
+}
