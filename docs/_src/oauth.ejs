@@ -1,6 +1,15 @@
-<h1>Active 911 HUD Authorization</h1>
-
-<p>Authorization for <em>Active 911 HUD</em> to connect to Active911 has been granted.  Please <a href="active911hud://oauth-code=" id="hud-opener">launch Active911 HUD</a> now.</p>
+<div class="card">
+    <div class="card-header">
+        Active911 Authorization
+    </div>
+    <div class="card-body" id="oauth-card">
+        <h4 class="card-title">Success!</h4>
+        <p class="card-text">
+            You have successfully authorized <span class="badge badge-primary">Active911 HUD</span>
+            to read your <span class="badge badge-danger">Active911</span> data.
+        </p>
+    </div>
+</div>
 <script type="text/javascript">
     const qs = (function(a) {
         if (a == "") return {};
@@ -12,6 +21,25 @@
         return b;
     })(window.location.search.substr(1).split('&'));
 
-    var link = document.getElementById('hud-opener');
-    link.href = link.href + qs['code'];
+    var oauthCard = document.getElementById('oauth-card');
+    if (qs && typeof qs['code'] !== 'undefined') {
+        var link = document.createElement('a');
+        link.className = 'btn btn-primary';
+        link.href = 'active911hud://oauth-code=' + qs['code'];
+        link.innerText = 'Launch Active911 HUD';
+        oauthCard.appendChild(link);
+    }
+    else {
+        var elem = document.createElement('div');
+        elem.className = 'alert alert-danger';
+        elem.role = 'alert';
+        elem.innerText = 'An error has occurred.  Please try the authorization again.';
+
+        var children = oauthCard.children, i;
+        for (i=children.length-1; i>=0; i--) {
+            oauthCard.removeChild(children[i]);
+        }
+
+        oauthCard.appendChild(elem);
+    }
 </script>
