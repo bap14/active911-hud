@@ -2,13 +2,13 @@ body.splash-window {
   background-color: #778899;
   margin: 0;
   -webkit-app-region: drag;
+  overflow: hidden;
 
   #wrapper {
-    overflow: hidden;
     padding: 10px 10px 16px 170px;
     position: relative;
-    height: 200px;
-    width: 280px;
+    height: 226px;
+    width: 460px;
     -webkit-app-region: drag;
 
     #logo {
@@ -53,12 +53,13 @@ body.splash-window {
 
     #status-bar {
       height: 6px;
-      width: 0%;
+      width: 460px;
 
       bottom: 0;
       left: 0;
       position: absolute;
 
+      /*
       overflow: hidden;
 
       .fill-bar {
@@ -82,6 +83,7 @@ body.splash-window {
           }
         }
       }
+      */
     }
   }
 }

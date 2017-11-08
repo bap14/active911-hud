@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Startup - Active 911 HUD</title>
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="styles/splash.css" />
+    <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
@@ -22,8 +21,10 @@
                 <li>Initializing &hellip;</li>
             </ul>
         </div>
-        <div id="status-bar">
-            <span class="fill-bar"></span>
+        <div id="status-bar" class="progress">
+            <div class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" style="width: 0%">
+                <span class="sr-only">80% Complete</span>
+            </div>
         </div>
     </div>
 
