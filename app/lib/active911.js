@@ -3,6 +3,7 @@
 module.exports = function (active911Settings) {
     const app = require('electron');
     const ipcMain = require('electron').ipcMain;
+    /*
     let credentials = {
             client: {
                 id: 'activehud',
@@ -17,12 +18,14 @@ module.exports = function (active911Settings) {
         oauthScope = 'read_agency read_alert read_response read_device read_mapdata',
         oauth2,
         token;
+    */
 
     let Active911 = function () {
         // active911Settings = app.getGlobal('active911Settings');
-        oauth2 = require('simple-oauth2').create(credentials);
+        // oauth2 = require('simple-oauth2').create(credentials);
     };
 
+    /*
     Active911.prototype.exchangeAuthToken = function (accessToken) {
         oauth2.authorizationCode.getToken({
             grant_type: "authorization_code",
@@ -86,6 +89,7 @@ module.exports = function (active911Settings) {
             ipcMain.emit('oauth-authorize', authorizationUri);
         }
     };
+    */
 
     return new Active911();
 }

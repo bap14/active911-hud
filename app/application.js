@@ -13,6 +13,19 @@ const ipcMain = electron.ipcMain;
 const remote = electron.remote;
 const fs = require('graceful-fs');
 const os = require('os');
+const oauthCredentials = {
+    client: {
+        id: 'activehud',
+        secret: 'e518b54e3c'
+    },
+    auth: {
+        tokenHost: 'https://access.active911.com',
+        tokenPath: '/interface/open_api/token.php',
+        authorizePath: '/interface/open_api/authorize_agency.php'
+    }
+};
+const oauthScope = 'read_agency read_alert read_response read_device read_mapdata';
+const oauth2 = require('simple-oauth2').create(oauthCredentials);
 let settingsWindow, splashScreen, hudWindow, oauthWindow, appIcon = __dirname + "/images/active911.ico";
 
 if (os.platform().toLowerCase() === "darwin") {
@@ -39,6 +52,7 @@ function createHUDWindow() {
     hudWindow.on('closed', () => hudWindow = null);
 }
 
+/*
 function createOauthWindow(authUri) {
     oauthWindow = new BrowserWindow({ width: 755, height: 550, parent: hudWindow, frame: false, icon: appIcon });
     oauthWindow.loadURL('file://' + __dirname + '/views/oauth.html');
@@ -48,6 +62,7 @@ function createOauthWindow(authUri) {
     });
     oauthWindow.on("closed", () => oauthWindow = null);
 }
+*/
 
 function createSplashScreen() {
     splashScreen = new BrowserWindow({ width: 460, height: 226, parent: hudWindow, frame: false, icon: appIcon });
@@ -78,9 +93,7 @@ function createSettingsWindow(errorMessage) {
 }
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
 });
 app.on('ready', () => {
     createSplashScreen();
@@ -91,6 +104,17 @@ app.on('activate', () => {
     }
 });
 
+const isExtraInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
+   if (hudWindow !== null) {
+       if (hudWindow.isMinimized()) hudWindow.restore();
+       hudWindow.focus();
+   }
+   console.log(commandLine);
+});
+if (isExtraInstance) app.quit();
+
+app.setAsDefaultProtocolClient('active911hud');
+
 ipcMain.on('show-settings-window', () => {
     createSettingsWindow();
 });
@@ -99,7 +123,14 @@ ipcMain.on('check-oauth', () => {
     active911.validateToken();
 });
 ipcMain.on('oauth-authorize', (authUrl) => {
-    createOauthWindow(authUrl);
+    // createOauthWindow(authUrl);
+    electron.openExternal(
+        oauth2.authorizationCode.authorizeURL({
+            response_type: "code",
+            redirection_uri: 'http://bap14.github.io/oauth',
+            scope: oauthScope
+        })
+    );
 });
 ipcMain.on('oauth-error', (error) => {
     console.error(error);

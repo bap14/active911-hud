@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Startup - Active 911 HUD</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="styles/splash.css" />
     <script>
         const remote = require('electron').remote;
@@ -25,6 +26,10 @@
             <span class="fill-bar"></span>
         </div>
     </div>
+
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/popper.js/dist/umd/popper.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script>
         function updateStatusMessage(message, barWidth) {
             if (typeof barWidth !== "undefined" && barWidth >= 0 && barWidth <= 100) {

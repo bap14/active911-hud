@@ -1,0 +1,22 @@
+{
+  "name": "active-911-hud",
+  "description": "A friendly Heads Up Display (HUD) for viewing current call details and response status of personnel",
+  "main": "app/application.js",
+  "authors": [
+    "Brett P <bap14@users.noreply.github.com>"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/bap14/active-911-hud",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "popper.js": "^1.12.6"
+  }
+}
