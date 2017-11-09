@@ -1,5 +1,5 @@
 {
-  "name": "active-911-hud",
+  "name": "active911-hud",
   "version": "0.0.1",
   "main": "app/application.js",
   "license": "Apache-2.0",
@@ -7,8 +7,8 @@
   "author": "Brett P <bap14@users.noreply.github.com>",
   "repository": "",
   "build": {
-    "appId": "com.github.users.noreply.bap14.active-911-hud",
-    "productName": "Active 911 HUD",
+    "appId": "com.github.users.noreply.bap14.active911-hud",
+    "productName": "Active911 HUD",
     "copyright": "Copyright © 2017 ${author}",
     "windows": {
       "target": "nsis",
