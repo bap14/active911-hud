@@ -1,9 +1,8 @@
 "use strict";
 
 module.exports = function (active911Settings) {
-    const app = require('electron');
+    const app = require('electron').app;
     const ipcMain = require('electron').ipcMain;
-    /*
     let credentials = {
             client: {
                 id: 'activehud',
@@ -15,17 +14,15 @@ module.exports = function (active911Settings) {
                 authorizePath: '/interface/open_api/authorize_agency.php'
             }
         },
+        expirationWindow = 3600,
         oauthScope = 'read_agency read_alert read_response read_device read_mapdata',
         oauth2,
         token;
-    */
 
     let Active911 = function () {
-        // active911Settings = app.getGlobal('active911Settings');
-        // oauth2 = require('simple-oauth2').create(credentials);
+        oauth2 = require('simple-oauth2').create(credentials);
     };
 
-    /*
     Active911.prototype.exchangeAuthToken = function (accessToken) {
         oauth2.authorizationCode.getToken({
             grant_type: "authorization_code",
@@ -36,12 +33,24 @@ module.exports = function (active911Settings) {
             token = oauth2.accessToken.create(result);
             active911Settings.setOauthToken(token).save();
 
-            ipcMain.send('oauth-complete');
+            ipcMain.emit('oauth-complete');
         })
         .catch((error) => {
-            ipcMain.send('oauth-error', [ error ]);
+            ipcMain.emit('oauth-error', [ error ]);
         });
     };
+
+    Active911.prototype.expiringSoon = function (token) {
+        let expirationTime = (new Date(token.expires_at)).getTime() / 1000;
+        let now = (new Date()).getTime() / 1000;
+
+        if (now >= (expirationTime - expirationWindow)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
 
     Active911.prototype.parseURI = function (str, options) {
         let o = Object.assign({
@@ -70,26 +79,26 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.validateToken = function () {
-        if (active911Settings.hasOauthToken()) {
-            console.log('Oauth token found! Refreshing token');
-            token = oauth2.accessToken.create(active911Settings.getOauthToken());
-            token.refresh().then((result) => {
-                token = result;
-                active911Settings.setOauthToken(token).save();
-            });
-        }
-        else {
-            // Start auth workflow
+        let token = oauth2.accessToken.create(active911Settings.getOauthToken());
+        if (token === false) {
             const authorizationUri = oauth2.authorizationCode.authorizeURL({
                 response_type: "code",
-                redirection_uri: 'http://localhost:3000/callback',
+                redirection_uri: 'https://bap14.github.io/active911-hud/oauth.html',
                 scope: oauthScope
             });
 
             ipcMain.emit('oauth-authorize', authorizationUri);
         }
+        else if (this.expiringSoon(token)) {
+            token.refresh().then((result) => {
+                active911Settings.setOauthToken(result).save();
+                ipcMain.emit('oauth-complete');
+            });
+        }
+        else {
+            ipcMain.emit('oauth-complete');
+        }
     };
-    */
 
     return new Active911();
 }

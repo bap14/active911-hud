@@ -13,59 +13,67 @@ const ipcMain = electron.ipcMain;
 const remote = electron.remote;
 const fs = require('graceful-fs');
 const os = require('os');
-const oauthCredentials = {
-    client: {
-        id: 'activehud',
-        secret: 'e518b54e3c'
-    },
-    auth: {
-        tokenHost: 'https://access.active911.com',
-        tokenPath: '/interface/open_api/token.php',
-        authorizePath: '/interface/open_api/authorize_agency.php'
-    }
-};
-const oauthScope = 'read_agency read_alert read_response read_device read_mapdata';
-const oauth2 = require('simple-oauth2').create(oauthCredentials);
 let settingsWindow, splashScreen, hudWindow, oauthWindow, appIcon = __dirname + "/images/active911.ico";
 
 if (os.platform().toLowerCase() === "darwin") {
     appIcon = __dirname + "/images/active911.icns";
 }
 
-global.active911Settings = require('./lib/active911Settings.js')(app);
+global.active911Settings = require('./lib/active911Settings.js')();
 global.active911 = require('./lib/active911.js')(global.active911Settings);
 
+function checkOAuthToken() {
+    let auth = active911Settings.get('active911auth'),
+        expiresAt = new Date(auth.token.expires_at);
+    console.log(expiresAt);
+}
+
 function createHUDWindow() {
-    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, icon: __dirname + "/images/active911.ico" });
+    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, icon: appIcon, fullscreen: true });
     hudWindow.hide();
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
         hudWindow.show();
 
         if (splashScreen) {
-            // let splashScreenBounds = splashScreen.getBounds();
-            // hudWindow.setBounds(splashScreenBounds);
             splashScreen.close();
         }
     });
-    hudWindow.webContents.openDevTools();
     hudWindow.on('closed', () => hudWindow = null);
+
+    // TODO: Start timer, every 60 minutes check if OAuth token needs refresh
+    checkOAuthToken();
 }
 
-/*
 function createOauthWindow(authUri) {
-    oauthWindow = new BrowserWindow({ width: 755, height: 550, parent: hudWindow, frame: false, icon: appIcon });
-    oauthWindow.loadURL('file://' + __dirname + '/views/oauth.html');
-    oauthWindow.webContents.on('did-finish-load', ()  => {
-        oauthWindow.openDevTools();
-        oauthWindow.send('load-oauth-url', { url: authUri });
+    splashScreen.send('add-status-message', 'Getting credentials &hellip;', 5);
+    oauthWindow = new BrowserWindow({ width: 800, height: 560, parent: hudWindow, modal: true, frame: true, icon: appIcon, show: false });
+    oauthWindow.once('ready-to-show', () => {
+        oauthWindow.show();
     });
-    oauthWindow.on("closed", () => oauthWindow = null);
+    oauthWindow.loadURL(authUri);
+    oauthWindow.webContents.on('did-finish-load', (evt)  => {
+        oauthWindow.show();
+        let loadedUrl = oauthWindow.webContents.getURL();
+
+        if (/bap14\.github\.io\/active911-hud\/oauth\.html/.test(loadedUrl) ||
+            /(www\.)?winfieldvfd\.org/.test(loadedUrl)
+        ) {
+            oauthWindow.hide();
+            let uri = active911.parseURI(loadedUrl);
+
+            splashScreen.send('add-status-message', '', 20);
+            active911.exchangeAuthToken(uri.queryKey.code);
+        }
+    });
+    oauthWindow.on("closed", () => {
+        oauthWindow = null;
+        splashScreen.show();
+    });
 }
-*/
 
 function createSplashScreen() {
-    splashScreen = new BrowserWindow({ width: 460, height: 226, parent: hudWindow, frame: false, icon: appIcon });
+    splashScreen = new BrowserWindow({ width: 600, height: 226, parent: hudWindow, frame: false, show: false, icon: appIcon });
     splashScreen.loadURL("file://" + __dirname + "/views/splash.html");
     splashScreen.on('closed', () => splashScreen = null);
     splashScreen.webContents.on('did-finish-load', () => {
@@ -122,22 +130,18 @@ ipcMain.on('show-settings-window', () => {
 ipcMain.on('check-oauth', () => {
     active911.validateToken();
 });
-ipcMain.on('oauth-authorize', (authUrl) => {
-    // createOauthWindow(authUrl);
-    electron.openExternal(
-        oauth2.authorizationCode.authorizeURL({
-            response_type: "code",
-            redirection_uri: 'http://bap14.github.io/oauth',
-            scope: oauthScope
-        })
-    );
+ipcMain.on('oauth-authorize', (authUri) => {
+    createOauthWindow(authUri);
 });
 ipcMain.on('oauth-error', (error) => {
     console.error(error);
 });
 ipcMain.on('oauth-complete', () => {
-    oauthWindow.close();
-    splashScreen.send('oauth-complete');
+    if (oauthWindow) {
+        oauthWindow.close();
+    }
+    splashScreen.send('add-status-message', 'Loading HUD &hellip;', 50);
+    createHUDWindow();
 });
 ipcMain.on('active911-auth-complete', () => {
     // createHUDWindow();

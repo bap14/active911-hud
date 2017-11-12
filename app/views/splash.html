@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <base href="../" />
-    <title>Startup - Active 911 HUD</title>
+    <title>Startup - Active911 HUD</title>
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
-        window.$ = window.jQuery = require('jquery');
         let active911Settings = remote.getGlobal('active911Settings');
         let active911 = remote.getGlobal('active911');
     </script>
@@ -23,36 +22,36 @@
         </div>
         <div id="status-bar" class="progress">
             <div class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" style="width: 0%">
-                <span class="sr-only">80% Complete</span>
             </div>
         </div>
     </div>
 
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="bower_components/popper.js/dist/umd/popper.min.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script>window.$ = window.jQuery = require("../js/jquery.min.js");</script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
     <script>
         function updateStatusMessage(message, barWidth) {
             if (typeof barWidth !== "undefined" && barWidth >= 0 && barWidth <= 100) {
-                $('#status-bar').animate({width: barWidth + '%'}, 200);
+                $('#status-bar > .progress-bar').animate({width: barWidth + '%'}, 200);
             }
 
-            $('#console').append('<li>' + message + '</li>');
+            if (message) $('#console').append('<li>' + message + '</li>');
+
             $('#console')[0].scrollTop = $('#console').scrollHeight;
         }
+
+        ipcRenderer.on('add-status-message', (evt, message, barWidth) => {
+            updateStatusMessage(message, barWidth);
+        });
 
         ipcRenderer.on('main-window-ready', () => {
             updateStatusMessage("Launching &hellip;", 100);
             ipcRenderer.send('splash-complete');
         });
 
-        ipcRenderer.on('oauth-complete', () => {
-            updateStatusMessage("Loading HUD &hellip;", 75);
-            ipcRenderer.send('load-hud');
-        });
-
         $(document).ready(function () {
-            updateStatusMessage('Checking Authentication &hellip;', 25);
+            updateStatusMessage('Checking Authentication &hellip;', 10);
             ipcRenderer.send('check-oauth');
         })
     </script>

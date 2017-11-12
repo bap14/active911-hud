@@ -29,12 +29,15 @@
   },
   "scripts": {
     "install": "electron-builder install-app-deps",
-    "start": "electron .",
+    "start": "gulp start",
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },
   "devDependencies": {
     "electron-builder": "^19.27.7",
+    "gulp": "^3.9.1",
+    "gulp-less": "^3.3.2",
+    "gulp-run": "^1.7.1",
     "less": "^2.7.3",
     "less-plugin-clean-css": "^1.5.1"
   }

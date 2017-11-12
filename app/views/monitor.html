@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="../" />
+    <title>Active911 HUD</title>
+    <link rel="stylesheet" href="styles/style.css" />
+    <script>
+        const remote = require('electron').remote;
+        const ipcRenderer = require('electron').ipcRenderer;
+        let active911Settings = remote.getGlobal('active911Settings');
+        let active911 = remote.getGlobal('active911');
+    </script>
+</head>
+<body id="active911-hud">
+    <div class="container">
+
+    </div>
+    <script>window.$ = window.jQuery = require("../js/jquery.min.js");</script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</body>
+</html>

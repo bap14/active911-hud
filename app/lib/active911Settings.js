@@ -39,8 +39,8 @@ module.exports = function () {
     };
 
     active911Settings.prototype.getOauthToken = function () {
-        if (this.config && this.config.active911auth) {
-            return this.config.active911auth;
+        if (this.config && this.config.active911auth && this.config.active911auth.token) {
+            return this.config.active911auth.token;
         }
 
         return false;
@@ -52,8 +52,9 @@ module.exports = function () {
         if (
             this.config &&
             this.config.active911auth &&
-            this.config.active911auth.access_token &&
-            this.config.active911auth.refresh_token
+            this.config.active911auth.token &&
+            this.config.active911auth.token.access_token &&
+            this.config.active911auth.token.refresh_token
         ) {
             returnValue = true;
         }
@@ -65,8 +66,8 @@ module.exports = function () {
         if (!this.config) {
             this.config = {};
         }
-
         this.config.active911auth = token;
+        return this;
     };
 
     return new active911Settings();
