@@ -140,8 +140,11 @@ ipcMain.on('oauth-complete', () => {
     if (oauthWindow) {
         oauthWindow.close();
     }
-    splashScreen.send('add-status-message', 'Loading HUD &hellip;', 50);
-    createHUDWindow();
+
+    // TODO: Google OAuth workflow
+
+    //splashScreen.send('add-status-message', 'Loading HUD &hellip;', 50);
+    //createHUDWindow();
 });
 ipcMain.on('active911-auth-complete', () => {
     // createHUDWindow();
