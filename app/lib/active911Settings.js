@@ -38,6 +38,14 @@ module.exports = function () {
         return value === undefined ? defaultValue : value;
     };
 
+    active911Settings.prototype.getGoogleMapsApiKey = function () {
+        if (this.config && this.config.googleMapsKey) {
+            return this.config.googleMapsKey;
+        }
+
+        return false;
+    };
+
     active911Settings.prototype.getOauthToken = function () {
         if (this.config && this.config.active911auth && this.config.active911auth.token) {
             return this.config.active911auth.token;

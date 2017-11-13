@@ -29,7 +29,7 @@ function checkOAuthToken() {
 }
 
 function createHUDWindow() {
-    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, icon: appIcon, fullscreen: true });
+    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, show: false, icon: appIcon, fullscreen: true });
     hudWindow.hide();
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
@@ -82,7 +82,7 @@ function createSplashScreen() {
 }
 
 function createSettingsWindow(errorMessage) {
-    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: false, icon: appIcon });
+    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: true, icon: appIcon, show: false });
     settingsWindow.hide();
     settingsWindow.errorMessage = errorMessage || false
     settingsWindow.loadURL('file://' + __dirname + '/views/settings.html');
@@ -141,10 +141,16 @@ ipcMain.on('oauth-complete', () => {
         oauthWindow.close();
     }
 
-    // TODO: Google OAuth workflow
+    splashScreen.send('add-status-message', 'Checking settings &hellip;', 70);
 
-    //splashScreen.send('add-status-message', 'Loading HUD &hellip;', 50);
-    //createHUDWindow();
+    if (active911Settings.getGoogleMapsApiKey()) {
+        createSettingsWindow();
+    } else {
+        splashScreen.send('add-status-message', 'Launching HUD &hellip;', 100);
+        createHUDWindow();
+    }
+
+
 });
 ipcMain.on('active911-auth-complete', () => {
     // createHUDWindow();

@@ -23,6 +23,19 @@ module.exports = function (active911Settings) {
         oauth2 = require('simple-oauth2').create(credentials);
     };
 
+    Active911.prototype.callApi = function (apiPath, params, successCallback) {
+        successCallback = successCallback || function () {};
+        $.ajax({
+            url: 'https://access.active911.com/interface/open_api/api/' + apiPath,
+            type: 'GET',
+            headers: {
+                Authorization: 'Bearer ' + active911Settings.getOauthToken().access_token
+            },
+            parameters: params,
+            success: successCallback
+        });
+    };
+
     Active911.prototype.exchangeAuthToken = function (accessToken) {
         oauth2.authorizationCode.getToken({
             grant_type: "authorization_code",
