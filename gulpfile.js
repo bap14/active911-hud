@@ -26,6 +26,8 @@ gulp.task('prepare', () => {
         'bower_components/popper.js/dist/umd/popper-utils.min.js',
         'bower_components/bootstrap/dist/js/bootstrap.min.js'
     ]).pipe(gulp.dest('app/js'));
+
+    gulp.src('build/icons/*').pipe(gulp.dest('app/images/icons'));
 });
 
 gulp.task('start', ['prepare'], () => {

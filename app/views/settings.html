@@ -4,83 +4,72 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Settings</title>
-    <link rel="stylesheet" type="text/css" href="../node_modules/materialize-css/dist/css/materialize.min.css" />
-    <style type="text/css">
-        body { padding: 0; margin: 0; background: transparent; }
-    </style>
+    <link rel="stylesheet" href="styles/bootstrap.min.css" />
+    <link rel="stylesheet" href="styles/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="styles/style.css" />
     <script>
+        const shell = require('electron').shell;
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
         const active911Settings = remote.getGlobal('active911Settings');
-
-        window.$ = window.jQuery = require('jquery');
-        require('hammerjs');
-        require('materialize-css');
     </script>
 </head>
-<body class="settings-window">
-<form>
-    <div class="card horizontal grey lighten-5">
-        <div class="card-image">
-            <img src="images/logo-splash.png" />
-        </div>
-        <div class="card-stacked">
-            <div class="card-content">
-                <span class="card-title red-text darken-2">HUD Settings</span>
-                <div class="card-panel red darken-2 white-text" id="error-wrapper" style="display: none;">
-                    <i class="material-icons left">error_outline</i>
-                    <span id="error-message"></span>
-                </div>
-                <div class="input-field">
-                    <input type="text" id="accessToken" />
-                    <label for="accessToken">Access Token</label>
-                </div>
-                <div class="input-field">
-                    <input type="text" id="refreshToken" />
-                    <label for="refreshToken">Refresh Token</label>
+<body id="settings-window">
+<div class="container">
+    <form>
+        <div class="panel panel-danger">
+            <div class="panel-heading">
+                <h3 class="panel-title">Active911 Settings</h3>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="active911:token">Access Token</label>
+                    <input class="form-control" id="active911:token" placeholder="Click 'Auth With Active911' to generate" readonly />
+                    <button id="active911-oauth" class="btn btn-info">Auth with Active911</button>
+                    <p class="help-block">This token will automatically refresh before it expires.</p>
                 </div>
             </div>
-            <div class="card-action">
-                <button class="btn waves-effect waves-blue" id="refresh">
-                    Refresh Token
-                    <i class="material-icons right">refresh</i>
-                </button>
-                <button class="btn waves-effect waves-green" id="save">
-                    Save
-                    <i class="material-icons right">save</i>
-                </button>
+        </div>
+
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">Google Maps Settings</h3>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="active911:google-maps-api">Goole Maps API Key</label>
+                    <input class="form-control" id="active911:google-maps-api" placeholder="XA-asdadfadfasdfasdf" />
+                    <p class="help-block">
+                        Get your google maps API key by following the instructions found
+                        <button id="launch-google" class="btn btn-default btn-xs">here</button>.
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-</form>
+
+        <button id="save" class="btn btn-primary">Save</button>
+    </form>
+</div>
+<script>window.$ = window.jQuery = require("../js/jquery.min.js");</script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
 <script type="text/javascript">
-    $('#exit').on('click', () => {
-        let win = remote.getCurrentWindow();
-        win.close();
+    let token = active911Settings.getOauthToken();
+    if (token) {
+        $('#active911\\:token').val(token.access_token);
+    }
+
+    $('#launch-google').on('click', (e) => {
+        shell.openExternal('https://developers.google.com/maps/documentation/javascript/get-api-key');
     });
-    ipcRenderer.on('show-login-error', (evt, message) => {
-        $('#error-message').html(message);
-        $('#error-wrapper').show();
+    $('#active911-oauth').on('click', (e) => {
+        ipcRenderer.send('oauth-authorize');
+        remote.getCurrentWindow().close();
     });
     $('#save').on('click', (e) => {
-    });
-
-    /*
-    $('#agency').val(iarSettings.get('auth.agency'));
-    $('#username').val(iarSettings.get('auth.username'));
-    $('#password').val(iarSettings.get('auth.password'));
-
-    $('#doLogin').on('click', (e) => {
-        e.preventDefault();
-        iarSettings.set('auth.agency', $('#agency').val())
-            .set('auth.username', $('#username').val())
-            .set('auth.password', $('#password').val())
-            .set('general.autostart', $('#autostart').prop('checked'))
-            .save();
-
+        active911Settings.setGoogleMapsApiKey($('#active911\\:google-maps-api').val());
         ipcRenderer.send('settings-saved');
     });
-    */
 </script>
 </body>
 </html>

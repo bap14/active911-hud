@@ -39,10 +39,9 @@ module.exports = function () {
     };
 
     active911Settings.prototype.getGoogleMapsApiKey = function () {
-        if (this.config && this.config.googleMapsKey) {
-            return this.config.googleMapsKey;
+        if (this.config && this.config.googleMapsApiKey) {
+            return this.config.googleMapsApiKey;
         }
-
         return false;
     };
 
@@ -70,11 +69,21 @@ module.exports = function () {
         return returnValue;
     };
 
+    active911Settings.prototype.setGoogleMapsApiKey = function (key) {
+        if (!this.config) {
+            this.config = {};
+        }
+        this.config.googleMapsApiKey = key;
+        this.save();
+        return this;
+    };
+
     active911Settings.prototype.setOauthToken = function (token) {
         if (!this.config) {
             this.config = {};
         }
         this.config.active911auth = token;
+        this.save();
         return this;
     };
 

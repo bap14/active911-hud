@@ -13,11 +13,17 @@ const ipcMain = electron.ipcMain;
 const remote = electron.remote;
 const fs = require('graceful-fs');
 const os = require('os');
-let settingsWindow, splashScreen, hudWindow, oauthWindow, appIcon = __dirname + "/images/active911.ico";
+let settingsWindow,
+    splashScreen,
+    hudWindow,
+    oauthWindow,
+    iconName = "active911.ico",
+    appIcon = path.join(__dirname, "images", "icons");
 
 if (os.platform().toLowerCase() === "darwin") {
-    appIcon = __dirname + "/images/active911.icns";
+    iconName = "active911.icns";
 }
+appIcon = path.join(appIcon, iconName);
 
 global.active911Settings = require('./lib/active911Settings.js')();
 global.active911 = require('./lib/active911.js')(global.active911Settings);
@@ -73,7 +79,7 @@ function createOauthWindow(authUri) {
 }
 
 function createSplashScreen() {
-    splashScreen = new BrowserWindow({ width: 600, height: 226, parent: hudWindow, frame: false, show: false, icon: appIcon });
+    splashScreen = new BrowserWindow({ width: 600, height: 226, frame: false, show: false, icon: appIcon });
     splashScreen.loadURL("file://" + __dirname + "/views/splash.html");
     splashScreen.on('closed', () => splashScreen = null);
     splashScreen.webContents.on('did-finish-load', () => {
@@ -82,7 +88,18 @@ function createSplashScreen() {
 }
 
 function createSettingsWindow(errorMessage) {
-    settingsWindow = new BrowserWindow({ width: 650, height: 500, parent: hudWindow, frame: true, icon: appIcon, show: false });
+    settingsWindow = new BrowserWindow({
+        width: 400,
+        height: 540,
+        parent: splashScreen,
+        frame: true,
+        icon: appIcon,
+        show: false,
+        autoHideMenuBar: true,
+        minimizable: false,
+        maximizable: false,
+        fullscreenable: false
+    });
     settingsWindow.hide();
     settingsWindow.errorMessage = errorMessage || false
     settingsWindow.loadURL('file://' + __dirname + '/views/settings.html');
@@ -143,7 +160,7 @@ ipcMain.on('oauth-complete', () => {
 
     splashScreen.send('add-status-message', 'Checking settings &hellip;', 70);
 
-    if (active911Settings.getGoogleMapsApiKey()) {
+    if (!active911Settings.getGoogleMapsApiKey()) {
         createSettingsWindow();
     } else {
         splashScreen.send('add-status-message', 'Launching HUD &hellip;', 100);
