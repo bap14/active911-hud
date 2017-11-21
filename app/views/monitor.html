@@ -26,7 +26,7 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <p class="navbar-right">
-                    <button class="btn btn-primary btn-default navbar-btn" type="button">
+                    <button class="btn btn-default navbar-btn" type="button">
                         <span class="glyphicon glyphicon-cog"></span>
                     </button>
                 </p>
@@ -34,7 +34,7 @@
         </div>
     </nav>
     <div class="container-fluid">
-        <div class="row">
+        <div class="row" id="active911:wrapper">
             <div class="col-lg-6">
                 <div class="row">
                     <div class="col-lg-12" id="active911:active-alert"></div>
@@ -43,6 +43,15 @@
             </div>
             <div class="col-lg-6" id="active911:map"></div>
         </div>
+    </div>
+    <div id="active911:settings">
+        <nav class="navbar navbar-info">
+            <div class="navbar-collapse collapse">
+                <button class="btn btn-danger navbar-btn">
+                    <span class="glyphicon glyphicon-close"></span>
+                </button>
+            </div>
+        </nav>
     </div>
     <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
     <script src="js/lib/popper.min.js"></script>
@@ -57,8 +66,10 @@
             document.getElementsByTagName('body')[0].appendChild(script);
         }
 
+        $('#active911\\:agency').html('Winfield VFD');
+
         function initializeMap() {
-            map = new google.maps.Map($("#active911\\:map").first(), {
+            map = new google.maps.Map($("#active911\\:map"), {
                 center: { lat: -34.397, lng: 150.644 },
                 zoom: 8
             });
