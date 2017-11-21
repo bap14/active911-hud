@@ -288,6 +288,10 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
+bootstrap@^3.3.7:
+  version "3.3.7"
+  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.3.7.tgz#5a389394549f23330875a3b150656574f8a9eb71"
+
 boxen@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/boxen/-/boxen-1.2.2.tgz#3f1d4032c30ffea9d4b02c322eaf2ea741dcbce5"
@@ -1634,6 +1638,10 @@ isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
+jquery@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.2.1.tgz#5c4d9de652af6cd0a770154a631bba12b015c787"
+
 js-yaml@^3.10.0:
   version "3.10.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.10.0.tgz#2e78441646bd4682e963f22b6e92823c309c62dc"
@@ -2372,6 +2380,10 @@ plist@^2.1.0:
     base64-js "1.2.0"
     xmlbuilder "8.2.2"
     xmldom "0.1.x"
+
+popper.js@^1.12.6:
+  version "1.12.9"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.12.9.tgz#0dfbc2dff96c451bb332edcfcfaaf566d331d5b3"
 
 prebuild-install@^2.3.0:
   version "2.3.0"

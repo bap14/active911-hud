@@ -12,13 +12,19 @@ module.exports = function () {
 
         // Ensure userData path is available for writing
         if (!fs.existsSync(app.getPath("userData"))) {
-            fs.mkdirSync(app.getPath("userData"), 644);
+            fs.mkdirSync(app.getPath("userData"), 0o755);
         }
 
         this.configFilePath = app.getPath("userData") + "/" + filePath;
 
         if (!util.exists(this.configFilePath)) {
-            fs.writeFileSync(this.configFilePath, "{}");
+            try {
+                fs.writeFileSync(this.configFilePath, "{}");
+            }
+            catch (e) {
+                console.log(e);
+                throw e;
+            }
         }
 
         this.config = JSON.parse(fs.readFileSync(this.configFilePath));

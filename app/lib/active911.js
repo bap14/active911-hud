@@ -92,7 +92,7 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.validateToken = function () {
-        let token = oauth2.accessToken.create(active911Settings.getOauthToken());
+        let token = active911Settings.getOauthToken();
         if (token === false) {
             const authorizationUri = oauth2.authorizationCode.authorizeURL({
                 response_type: "code",
@@ -103,6 +103,7 @@ module.exports = function (active911Settings) {
             ipcMain.emit('oauth-authorize', authorizationUri);
         }
         else if (this.expiringSoon(token)) {
+            token = oauth2.accessToken.create(token);
             token.refresh().then((result) => {
                 active911Settings.setOauthToken(result).save();
                 ipcMain.emit('oauth-complete');
