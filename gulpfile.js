@@ -34,7 +34,7 @@ gulp.task('start', ['prepare'], () => {
     "use strict";
 
     return run('electron .', { verbosity: 3 }).exec()
-        .pipe(gulp.dest('console'));
+        .pipe(gulp.dest('output'));
 });
 
 gulp.task('default', ['start']);

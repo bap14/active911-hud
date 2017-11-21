@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Active911 HUD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
@@ -13,13 +16,53 @@
     </script>
 </head>
 <body id="active911-hud">
-    <div class="container">
-        <div id="alerts">
-            <ul></ul>
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <h3 class="navbar-brand">
+                    <img alt="Active911 HUD" src="images/logo.png" />
+                    <span id="active911:agency">Active911 HUD</span>
+                </h3>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <p class="navbar-right">
+                    <button class="btn btn-primary btn-default navbar-btn" type="button">
+                        <span class="glyphicon glyphicon-cog"></span>
+                    </button>
+                </p>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col-lg-12" id="active911:active-alert"></div>
+                    <div class="col-lg-12" id="active911:alerts"></div>
+                </div>
+            </div>
+            <div class="col-lg-6" id="active911:map"></div>
         </div>
     </div>
-    <script>window.$ = window.jQuery = require("../js/jquery.min.js");</script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
+    <script src="js/lib/popper.min.js"></script>
+    <script src="js/lib/bootstrap.min.js"></script>
+    <script>
+        let map, script;
+
+        if (active911Settings.getGoogleMapsApiKey()) {
+            script = document.createElement('script');
+            script.src = "https://maps.googleapis.com/maps/api/js?callback=initializeMap&key=";
+            script.src += active911Settings.getGoogleMapsApiKey();
+            document.getElementsByTagName('body')[0].appendChild(script);
+        }
+
+        function initializeMap() {
+            map = new google.maps.Map($("#active911\\:map").first(), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 8
+            });
+        }
+    </script>
 </body>
 </html>

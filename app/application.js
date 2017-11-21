@@ -52,7 +52,7 @@ function createHUDWindow() {
 }
 
 function createOauthWindow(authUri) {
-    splashScreen.send('add-status-message', 'Getting credentials &hellip;', 5);
+    splashScreen.send('add-status-message', 5);
     oauthWindow = new BrowserWindow({ width: 800, height: 560, parent: hudWindow, modal: true, frame: true, icon: appIcon, show: false });
     oauthWindow.once('ready-to-show', () => {
         oauthWindow.show();
@@ -68,7 +68,7 @@ function createOauthWindow(authUri) {
             oauthWindow.hide();
             let uri = active911.parseURI(loadedUrl);
 
-            splashScreen.send('add-status-message', '', 20);
+            splashScreen.send('add-status-message', 20);
             active911.exchangeAuthToken(uri.queryKey.code);
         }
     });
@@ -79,7 +79,7 @@ function createOauthWindow(authUri) {
 }
 
 function createSplashScreen() {
-    splashScreen = new BrowserWindow({ width: 600, height: 226, frame: false, show: false, icon: appIcon });
+    splashScreen = new BrowserWindow({ width: 600, height: 280, frame: false, show: false, icon: appIcon });
     splashScreen.loadURL("file://" + __dirname + "/views/splash.html");
     splashScreen.on('closed', () => splashScreen = null);
     splashScreen.webContents.on('did-finish-load', () => {
@@ -158,12 +158,12 @@ ipcMain.on('oauth-complete', () => {
         oauthWindow.close();
     }
 
-    splashScreen.send('add-status-message', 'Checking settings &hellip;', 70);
+    splashScreen.send('add-status-message', 70);
 
     if (!active911Settings.getGoogleMapsApiKey()) {
         createSettingsWindow();
     } else {
-        splashScreen.send('add-status-message', 'Launching HUD &hellip;', 100);
+        splashScreen.send('add-status-message', 100);
         createHUDWindow();
     }
 
@@ -176,7 +176,8 @@ ipcMain.on('settings-saved', () => {
     if (!hudWindow || hudWindow.isHidden()) {
         settingsWindow.close();
         splashScreen.show();
-        splashScreen.send('settings-saved');
+        splashScreen.send('add-update-message', 100);
+        createHUDWindow();
     } else {
         // Reinitialize with new settings
         hudWindow.close();

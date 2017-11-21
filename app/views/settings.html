@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Settings</title>
-    <link rel="stylesheet" href="styles/bootstrap.min.css" />
-    <link rel="stylesheet" href="styles/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const shell = require('electron').shell;
@@ -25,7 +25,7 @@
                 <div class="form-group">
                     <label for="active911:token">Access Token</label>
                     <input class="form-control" id="active911:token" placeholder="Click 'Auth With Active911' to generate" readonly />
-                    <button id="active911-oauth" class="btn btn-info">Auth with Active911</button>
+                    <!--button id="active911-oauth" class="btn btn-info">Auth with Active911</button-->
                     <p class="help-block">This token will automatically refresh before it expires.</p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
             <div class="panel-body">
                 <div class="form-group">
                     <label for="active911:google-maps-api">Goole Maps API Key</label>
-                    <input class="form-control" id="active911:google-maps-api" placeholder="XA-asdadfadfasdfasdf" />
+                    <input class="form-control" id="active911:google-maps-api" placeholder="AIzaSyAyyhI02wTeD6FE5NTx_WH06Qcj5p7NaJk" />
                     <p class="help-block">
                         Get your google maps API key by following the instructions found
                         <button id="launch-google" class="btn btn-default btn-xs">here</button>.
@@ -50,9 +50,9 @@
         <button id="save" class="btn btn-primary">Save</button>
     </form>
 </div>
-<script>window.$ = window.jQuery = require("../js/jquery.min.js");</script>
-<script src="js/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
+<script src="js/lib/popper.min.js"></script>
+<script src="js/lib/bootstrap.min.js"></script>
 <script type="text/javascript">
     let token = active911Settings.getOauthToken();
     if (token) {
@@ -60,13 +60,18 @@
     }
 
     $('#launch-google').on('click', (e) => {
+        e.preventDefault();
         shell.openExternal('https://developers.google.com/maps/documentation/javascript/get-api-key');
     });
+    /*
     $('#active911-oauth').on('click', (e) => {
+        e.preventDefault();
         ipcRenderer.send('oauth-authorize');
         remote.getCurrentWindow().close();
     });
+    */
     $('#save').on('click', (e) => {
+        e.preventDefault();
         active911Settings.setGoogleMapsApiKey($('#active911\\:google-maps-api').val());
         ipcRenderer.send('settings-saved');
     });

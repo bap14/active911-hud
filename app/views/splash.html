@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <base href="../" />
     <title>Startup - Active911 HUD</title>
-    <link rel="stylesheet" href="styles/bootstrap.min.css" />
-    <link rel="stylesheet" href="styles/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
@@ -16,44 +16,35 @@
 </head>
 <body class="splash-window">
     <div id="wrapper">
-        <div id="logo">Active 911</div>
-        <div id="content-area">
-            <ul id="console">
-                <li>Initializing &hellip;</li>
-            </ul>
-        </div>
+        <div id="logo">Active 911 HUD</div>
         <div id="status-bar" class="progress">
             <div class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" style="width: 0%">
             </div>
         </div>
     </div>
 
-    <script>window.$ = window.jQuery = require("../js/jquery.min.js");</script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
+    <script src="js/lib/popper.min.js"></script>
+    <script src="js/lib/bootstrap.min.js"></script>
 
     <script>
-        function updateStatusMessage(message, barWidth) {
+        function updateStatus(barWidth) {
             if (typeof barWidth !== "undefined" && barWidth >= 0 && barWidth <= 100) {
                 $('#status-bar > .progress-bar').animate({width: barWidth + '%'}, 200);
             }
-
-            if (message) $('#console').append('<li>' + message + '</li>');
-
-            $('#console')[0].scrollTop = $('#console').scrollHeight;
         }
 
-        ipcRenderer.on('add-status-message', (evt, message, barWidth) => {
-            updateStatusMessage(message, barWidth);
+        ipcRenderer.on('add-status-message', (evt, barWidth) => {
+            updateStatus(barWidth);
         });
 
         ipcRenderer.on('main-window-ready', () => {
-            updateStatusMessage("Launching &hellip;", 100);
+            updateStatus(100);
             ipcRenderer.send('splash-complete');
         });
 
         $(document).ready(function () {
-            updateStatusMessage('Checking Authentication &hellip;', 10);
+            updateStatus(10);
             ipcRenderer.send('check-oauth');
         })
     </script>

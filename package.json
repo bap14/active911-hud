@@ -28,17 +28,23 @@
     }
   },
   "scripts": {
+    "build": "npm run prebuild && node lib/build.js",
+    "clean": "node lib/clean.js",
+    "prebuild": "npm run clean",
     "install": "electron-builder install-app-deps",
-    "start": "gulp start",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "start": "npm run build && electron .",
+    "pack": "npm run prebuild && electron-builder --dir",
+    "dist": "npm run prebuild && electron-builder"
   },
   "devDependencies": {
+    "copy": "^0.3.1",
+    "copy-files": "^0.1.0",
     "electron-builder": "^19.27.7",
     "gulp": "^3.9.1",
     "gulp-less": "^3.3.2",
     "gulp-run": "^1.7.1",
     "less": "^2.7.3",
-    "less-plugin-clean-css": "^1.5.1"
+    "less-plugin-clean-css": "^1.5.1",
+    "rimraf": "^2.6.2"
   }
 }

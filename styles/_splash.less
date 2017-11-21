@@ -1,0 +1,39 @@
+body.splash-window {
+  background-color: #778899;
+  margin: 0;
+  -webkit-app-region: drag;
+  overflow: hidden;
+
+  #wrapper {
+    padding: 10px 10px 16px 10px;
+    position: relative;
+    width: 580px;
+    box-sizing: content-box;
+    -webkit-app-region: drag;
+
+    #logo {
+      background: transparent url('../images/logo-splash.png') no-repeat center center;
+
+      display: inline-block;
+      overflow: hidden;
+      text-indent: -5000em;
+
+      height: 250px;
+      width: 100%;
+
+      -webkit-app-region: drag;
+    }
+
+    #status-bar {
+      height: 6px;
+      width: 600px;
+
+      margin: 0;
+      padding: 0;
+
+      bottom: 0;
+      left: 0;
+      position: absolute;
+    }
+  }
+}
