@@ -26,8 +26,11 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <p class="navbar-right">
-                    <button class="btn btn-default navbar-btn" type="button">
+                    <button class="btn btn-default btn-info navbar-btn" type="button" id="active911:open-settings">
                         <span class="glyphicon glyphicon-cog"></span>
+                    </button>
+                    <button class="btn btn-danger navbar-btn" type="button" id="active911:exit">
+                        <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </p>
             </div>
@@ -45,11 +48,16 @@
         </div>
     </div>
     <div id="active911:settings">
-        <nav class="navbar navbar-info">
-            <div class="navbar-collapse collapse">
-                <button class="btn btn-danger navbar-btn">
-                    <span class="glyphicon glyphicon-close"></span>
-                </button>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <h3 class="navbar-brand">
+                        <button class="btn btn-danger navbar-btn" id="active911:close-settings">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                        Settings
+                    </h3>
+                </div>
             </div>
         </nav>
     </div>
@@ -69,6 +77,20 @@
         }
 
         $('#active911\\:agency').html('Winfield VFD');
+
+        $('#active911\\:exit').on('click', (e) => {
+            e.stopPropagation();
+            ipcRenderer.send('exit-application');
+        });
+
+        $('#active911\\:open-settings').on('click', (e) => {
+            e.stopPropagation();
+            $('#active911\\:settings').addClass('open');
+        });
+        $('#active911\\:close-settings').on('click', (e) => {
+            e.stopPropagation();
+            $('#active911\\:settings').removeClass('open');
+        })
 
         function googleMapInitializeCallback() {
             active911Map.initialize();

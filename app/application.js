@@ -166,8 +166,6 @@ ipcMain.on('oauth-complete', () => {
         splashScreen.send('add-status-message', 100);
         createHUDWindow();
     }
-
-
 });
 ipcMain.on('settings-saved', () => {
     if (!hudWindow || hudWindow.isHidden()) {
@@ -186,4 +184,8 @@ ipcMain.on('login-failure', (evt, message) => {
 });
 ipcMain.on('console.log', (evt, message) => {
     console.log(message);
+});
+
+ipcMain.on('exit-application', () => {
+    app.quit();
 });
