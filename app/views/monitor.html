@@ -56,23 +56,22 @@
     <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
+    <script src="js/active911HUD.map.js"></script>
     <script>
-        let map, script;
+        let active911Map;
 
         if (active911Settings.getGoogleMapsApiKey()) {
-            script = document.createElement('script');
-            script.src = "https://maps.googleapis.com/maps/api/js?callback=initializeMap&key=";
-            script.src += active911Settings.getGoogleMapsApiKey();
-            document.getElementsByTagName('body')[0].appendChild(script);
+            active911Map = new Active911HUDMap(
+                $('#active911\\:map'),
+                active911Settings.getGoogleMapsApiKey(),
+                "googleMapInitializeCallback"
+            );
         }
 
         $('#active911\\:agency').html('Winfield VFD');
 
-        function initializeMap() {
-            map = new google.maps.Map($("#active911\\:map"), {
-                center: { lat: -34.397, lng: 150.644 },
-                zoom: 8
-            });
+        function googleMapInitializeCallback() {
+            active911Map.initialize();
         }
     </script>
 </body>

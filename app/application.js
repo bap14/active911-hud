@@ -169,9 +169,6 @@ ipcMain.on('oauth-complete', () => {
 
 
 });
-ipcMain.on('active911-auth-complete', () => {
-    // createHUDWindow();
-});
 ipcMain.on('settings-saved', () => {
     if (!hudWindow || hudWindow.isHidden()) {
         settingsWindow.close();
