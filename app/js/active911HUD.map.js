@@ -13,15 +13,17 @@ var Active911HUDMap;
     };
 
     Active911HUDMap.prototype = {
+        geocoder: null,
         mapElem: null,
         googleMap: null,
         mapOptions: {
-            center: {lat: -34.397, lng: 150.644},
-            zoom: 8
+            center: {lat: 38.89768, lng: -77.038671},
+            zoom: 12
         },
 
         initialize: function () {
             this.googleMap = new google.maps.Map($(this.mapElem)[0], this.mapOptions);
+            this.geocoder = new google.maps.Geocoder();
         }
     };
 })(jQuery);

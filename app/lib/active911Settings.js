@@ -27,7 +27,25 @@ module.exports = function () {
             }
         }
 
-        this.config = JSON.parse(fs.readFileSync(this.configFilePath));
+        let storedConfig = JSON.parse(fs.readFileSync(this.configFilePath));
+
+        this.config = util.mergeObjects({
+            active911auth: {
+                token: {
+                    access_token: false
+                }
+            },
+            googleMapsApiKey: '',
+            googleMaps: {
+                center: {
+                    lat: 38.89768,
+                    lng: -77.038671
+                },
+                mapTypeId: 'roadmap',
+                zoom: 12,
+            }
+        }, storedConfig);
+        console.log(this.config);
     };
 
     active911Settings.prototype.save = function () {

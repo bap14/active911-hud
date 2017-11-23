@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
     <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap-slider.min.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
@@ -60,23 +61,104 @@
                 </div>
             </div>
         </nav>
+        <div class="container-fluid">
+            <form>
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Active911 Settings</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="active911:token">Access Token</label>
+                            <input class="form-control"
+                                   id="active911:token"
+                                   data-bind="value: active911auth.token.access_token"
+                                   readonly />
+                            <p class="help-block">This token will automatically refresh before it expires.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Google Maps Settings</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="active911:google-maps-api">API Key</label>
+                            <input class="form-control"
+                                   id="active911:google-maps-api"
+                                   data-bind="value: googleMapsApiKey"
+                                   placeholder="AIzaSyAyyhI02wTeD6FE5NTx_WH06Qcj5p7NaJk" />
+                            <p class="help-block">
+                                Get your google maps API key by following the instructions found
+                                <button id="launch-google" class="btn btn-default btn-xs">here</button>.
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="active911:googleMaps:geocode">Map Center</label>
+                            <div class="input-group">
+                                <input class="form-control"
+                                       id="active911:googleMaps:geocode"
+                                       placeholder="1600 Pennsylvania Ave, Washington D.C. 20202" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" id="active911:google-maps:lookup-location">
+                                        <span class="glyphicon glyphicon-search"></span>
+                                        <span class="sr-only">Lookup</span>
+                                    </button>
+                                </span>
+                                <input type="hidden"
+                                       id="active911:googleMaps:geocode:lat"
+                                       data-bind="value: googleMaps.center.lat" />
+                                <input type="hidden"
+                                       id="active911:googleMaps:geocode:lng"
+                                       data-bind="value: googleMaps.center.lng" />
+                            </div>
+                            <p class="help-block">
+                                Latitude: <span data-bind="text: googleMaps.center.lat"></span>
+                                Longitude: <span data-bind="text: googleMaps.center.lng"></span>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="active911:googleMaps:zoom">Zoom Level</label>
+                            <input class="form-control"
+                                   id="active911:googleMaps:zoom"
+                                   data-bind="value: googleMaps.zoom"
+                                   data-provide="slider"
+                                   data-slider-min="1"
+                                   data-slider-max="18"
+                                   data-slider-step="1"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="active911:settings-save">
+                    <span class="glyphicon glyphicon-floppy-disk"></span>
+                    Save
+                </button>
+            </form>
+        </div>
     </div>
     <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
+    <script src="js/lib/bootstrap-slider.min.js"></script>
+    <script src="js/lib/knockout.js"></script>
+    <script src="js/knockout.mapping.js"></script>
     <script src="js/active911HUD.map.js"></script>
     <script>
-        let active911Map;
+        let active911Map, active911SettingsModel;
 
         if (active911Settings.getGoogleMapsApiKey()) {
             active911Map = new Active911HUDMap(
                 $('#active911\\:map'),
                 active911Settings.getGoogleMapsApiKey(),
-                "googleMapInitializeCallback"
+                "googleMapInitializeCallback",
+                active911Settings.config.googleMaps
             );
         }
 
-        $('#active911\\:agency').html('Winfield VFD');
+        // $('#active911\\:agency').html('Winfield VFD');
 
         $('#active911\\:exit').on('click', (e) => {
             e.stopPropagation();
@@ -90,7 +172,35 @@
         $('#active911\\:close-settings').on('click', (e) => {
             e.stopPropagation();
             $('#active911\\:settings').removeClass('open');
-        })
+        });
+        $('#active911\\:google-maps\\:lookup-location').on('click', (e) => {
+            e.stopPropagation();
+            active911Map.geocoder.geocode({ address: $('#active911\\:googleMaps\\:geocode').val() }, (results, status) => {
+                if (status === 'OK') {
+                    // $('#active911\\:googleMaps\\:geocode\\:lat').val(results[0].geometry.location.lat()).change();
+                    // $('#active911\\:googleMaps\\:geocode\\:lng').val(results[0].geometry.location.lng()).change();
+                    active911SettingsModel.googleMaps.center.lat(results[0].geometry.location.lat());
+                    active911SettingsModel.googleMaps.center.lng(results[0].geometry.location.lng());
+                }
+                else {
+                    alert('Failed to geocode address: ' + status);
+                }
+            });
+            return false;
+        });
+        $('#active911\\:settings-save').on('click', (e) => {
+            e.stopPropagation();
+            let settings = ko.mapping.toJS(active911SettingsModel);
+            console.log(settings);
+            active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey).set('googleMaps', settings.googleMaps);
+            active911Settings.save();
+
+            // TODO: Recenter the map
+            return false;
+        });
+
+        active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
+        ko.applyBindings(active911SettingsModel);
 
         function googleMapInitializeCallback() {
             active911Map.initialize();

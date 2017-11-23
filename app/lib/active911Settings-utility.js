@@ -56,3 +56,24 @@ exports.remove = function(object, key) {
         return function() { delete object[attribute]; };
     } (object, path[i]);
 };
+
+exports.mergeObjects = function () {
+    let target = arguments[0];
+
+    for (let i = 1; i<arguments.length; i++) {
+        let source = arguments[i];
+
+        for (let prop in source) {
+            if (source.hasOwnProperty(prop)) {
+                if (typeof source[prop] === 'object') {
+                    target[prop] = exports.mergeObjects(target.hasOwnProperty(prop) ? target[prop] : {}, source[prop]);
+                }
+                else {
+                    target[prop] = source[prop];
+                }
+            }
+        }
+    }
+
+    return target;
+}
