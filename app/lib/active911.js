@@ -107,6 +107,9 @@ module.exports = function (active911Settings) {
             token.refresh().then((result) => {
                 active911Settings.setOauthToken(result).save();
                 ipcMain.emit('oauth-complete');
+            }).catch((error) => {
+                active911Settings.setOauthToken({}).save();
+                this.validateToken();
             });
         }
         else {
