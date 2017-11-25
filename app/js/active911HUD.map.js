@@ -17,17 +17,31 @@ var Active911HUDMap;
         mapElem: null,
         googleMap: null,
         mapOptions: {
-            center: {lat: 38.89768, lng: -77.038671},
+            centerAddress: '1600 Pennsylvania Ave Washington D.C. 20202',
+            center: { lat: 38.89768, lng: -77.038671 },
             zoom: 12
+        },
+
+        clearRoute: function () {
+        },
+
+        drawRoute: function (destination) {
         },
 
         initialize: function () {
             this.googleMap = new google.maps.Map($(this.mapElem)[0], this.mapOptions);
             this.geocoder = new google.maps.Geocoder();
+            this.homeMarker = new google.maps.Marker({
+                position: this.mapOptions.center,
+                map: this.googleMap
+            });
         },
 
-        getGoogleMap: function () {
-            return this.googleMap;
+        updateOptions: function (options) {
+            this.mapOptions = $.extend(this.mapOptions, options);
+
+            this.googleMap.setOptions(this.mapOptions);
+            this.homeMarker.setPosition(this.mapOptions.center);
         }
     };
 })(jQuery);
