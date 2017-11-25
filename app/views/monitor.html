@@ -49,7 +49,7 @@
         </div>
     </div>
     <div id="active911:settings">
-        <nav class="navbar navbar-inverse">
+        <nav class="navbar navbar-inverse navbar-static-top">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <h3 class="navbar-brand">
@@ -107,17 +107,16 @@
                                         <span class="sr-only">Lookup</span>
                                     </button>
                                 </span>
-                                <input type="hidden"
-                                       id="active911:googleMaps:geocode:lat"
-                                       data-bind="value: googleMaps.center.lat" />
-                                <input type="hidden"
-                                       id="active911:googleMaps:geocode:lng"
-                                       data-bind="value: googleMaps.center.lng" />
                             </div>
                             <p class="help-block">
-                                Latitude: <span data-bind="text: googleMaps.center.lat"></span>
-                                Longitude: <span data-bind="text: googleMaps.center.lng"></span>
+                                <ul>
+                                    <li>Latitude: <strong data-bind="text: googleMaps.center.lat"></strong></li>
+                                    <li>Longitude: <strong data-bind="text: googleMaps.center.lng"></strong></li>
+                                </ul>
                             </p>
+                            <div id="active911:geocoding">
+                                <h3>Looking Up Address &hellip;</h3>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="active911:googleMaps:zoom">Zoom Level</label>
@@ -128,7 +127,18 @@
                                    data-slider-min="1"
                                    data-slider-max="18"
                                    data-slider-step="1"
+                                   data-slider-value="7"
                             />
+                        </div>
+                        <div class="form-group">
+                            <label for="active911:googleMaps:mapTypeId">Map Type</label>
+                            <select id="active911:googleMaps:mapTypeId" class="form-control"
+                                    data-bind="value: googleMaps.mapTypeId">
+                                <option value="roadmap" selected>Roadmap</option>
+                                <option value="satellite">Satellite</option>
+                                <option value="terrain">Terrain</option>
+                                <option value="hybrid">Hybrid</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -139,7 +149,9 @@
             </form>
         </div>
     </div>
-    <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
+    <div id="active911:settings-overlay"></div>
+    <script src="js/lib/jquery.min.js"></script>
+    <script>window.$ = window.jQuery = require("jquery");</script>
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
     <script src="js/lib/bootstrap-slider.min.js"></script>
@@ -149,38 +161,28 @@
     <script>
         let active911Map, active911SettingsModel;
 
-        if (active911Settings.getGoogleMapsApiKey()) {
-            active911Map = new Active911HUDMap(
-                $('#active911\\:map'),
-                active911Settings.getGoogleMapsApiKey(),
-                "googleMapInitializeCallback",
-                active911Settings.config.googleMaps
-            );
-        }
-
-        // $('#active911\\:agency').html('Winfield VFD');
-
         $('#active911\\:exit').on('click', (e) => {
             e.stopPropagation();
             ipcRenderer.send('exit-application');
         });
-
         $('#active911\\:open-settings').on('click', (e) => {
             e.stopPropagation();
+            $('#active911\\:settings-overlay').fadeIn();
             $('#active911\\:settings').addClass('open');
         });
         $('#active911\\:close-settings').on('click', (e) => {
             e.stopPropagation();
             $('#active911\\:settings').removeClass('open');
+            $('#active911\\:settings-overlay').fadeOut();
         });
         $('#active911\\:google-maps\\:lookup-location').on('click', (e) => {
             e.stopPropagation();
+            $('#active911\\:geocoding').show();
             active911Map.geocoder.geocode({ address: $('#active911\\:googleMaps\\:geocode').val() }, (results, status) => {
                 if (status === 'OK') {
-                    // $('#active911\\:googleMaps\\:geocode\\:lat').val(results[0].geometry.location.lat()).change();
-                    // $('#active911\\:googleMaps\\:geocode\\:lng').val(results[0].geometry.location.lng()).change();
                     active911SettingsModel.googleMaps.center.lat(results[0].geometry.location.lat());
                     active911SettingsModel.googleMaps.center.lng(results[0].geometry.location.lng());
+                    $('#active911\\:geocoding').hide();
                 }
                 else {
                     alert('Failed to geocode address: ' + status);
@@ -191,20 +193,35 @@
         $('#active911\\:settings-save').on('click', (e) => {
             e.stopPropagation();
             let settings = ko.mapping.toJS(active911SettingsModel);
-            console.log(settings);
+            settings.googleMaps.zoom = parseInt(settings.googleMaps.zoom);
             active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey).set('googleMaps', settings.googleMaps);
             active911Settings.save();
 
-            // TODO: Recenter the map
+            active911Map.getGoogleMap().setOptions(settings.googleMaps);
+
+            $('#active911\\:close-settings').click();
             return false;
         });
-
-        active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
-        ko.applyBindings(active911SettingsModel);
 
         function googleMapInitializeCallback() {
             active911Map.initialize();
         }
+
+        $(document).ready(() => {
+            $('#active911\\:googleMaps\\:zoom').slider('setValue', active911Settings.config.googleMaps.zoom);
+
+            active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
+            ko.applyBindings(active911SettingsModel);
+
+            if (active911Settings.getGoogleMapsApiKey()) {
+                active911Map = new Active911HUDMap(
+                    $('#active911\\:map'),
+                    active911Settings.getGoogleMapsApiKey(),
+                    "googleMapInitializeCallback",
+                    active911Settings.config.googleMaps
+                );
+            }
+        });
     </script>
 </body>
 </html>

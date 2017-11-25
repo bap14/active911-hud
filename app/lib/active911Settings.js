@@ -45,7 +45,6 @@ module.exports = function () {
                 zoom: 12,
             }
         }, storedConfig);
-        console.log(this.config);
     };
 
     active911Settings.prototype.save = function () {

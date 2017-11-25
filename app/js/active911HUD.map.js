@@ -24,6 +24,10 @@ var Active911HUDMap;
         initialize: function () {
             this.googleMap = new google.maps.Map($(this.mapElem)[0], this.mapOptions);
             this.geocoder = new google.maps.Geocoder();
+        },
+
+        getGoogleMap: function () {
+            return this.googleMap;
         }
     };
 })(jQuery);
