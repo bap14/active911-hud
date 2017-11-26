@@ -12,8 +12,9 @@
     <script>
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
-        let active911Settings = remote.getGlobal('active911Settings');
-        let active911 = remote.getGlobal('active911');
+        let active911Settings = remote.getGlobal('active911Settings'),
+            active911 = remote.getGlobal('active911');
+        window.$ = window.jQuery = require("jquery");
     </script>
 </head>
 <body id="active911-hud">
@@ -149,8 +150,7 @@
         </div>
     </div>
     <div id="active911:settings-overlay"></div>
-    <script src="js/lib/jquery.min.js"></script>
-    <script>window.$ = window.jQuery = require("jquery");</script>
+
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
     <script src="js/lib/bootstrap-slider.min.js"></script>
@@ -220,6 +220,25 @@
                     active911Settings.config.googleMaps
                 );
             }
+
+            console.log('Caching device data');
+            active911.cacheDevices()
+                .then(() => {
+                    $('#active911\\:agency').html(active911.getAgency().name);
+
+                    active911Map.updateHomeMarker({
+                        lat: active911.getAgency().latitude,
+                        lng: active911.getAgency().longitude,
+                        visible: true
+                    });
+
+                    active911.getAlerts().then((alerts) => {
+                       console.log(alerts);
+                    });
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
         });
     </script>
 </body>

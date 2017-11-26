@@ -31,17 +31,21 @@ var Active911HUDMap;
         initialize: function () {
             this.googleMap = new google.maps.Map($(this.mapElem)[0], this.mapOptions);
             this.geocoder = new google.maps.Geocoder();
+
             this.homeMarker = new google.maps.Marker({
                 position: this.mapOptions.center,
-                map: this.googleMap
+                map: this.googleMap,
+                visible: false
             });
+        },
+
+        updateHomeMarker: function (config) {
+            this.homeMarker.setOptions(config);
         },
 
         updateOptions: function (options) {
             this.mapOptions = $.extend(this.mapOptions, options);
-
             this.googleMap.setOptions(this.mapOptions);
-            this.homeMarker.setPosition(this.mapOptions.center);
         }
     };
 })(jQuery);

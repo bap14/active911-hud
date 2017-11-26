@@ -3,6 +3,10 @@
 module.exports = function (active911Settings) {
     const app = require('electron').app;
     const ipcMain = require('electron').ipcMain;
+    const os = require('os');
+    const queryString = require('querystring');
+    const requestPromise = require('request-promise');
+
     let credentials = {
             client: {
                 id: 'activehud',
@@ -21,18 +25,76 @@ module.exports = function (active911Settings) {
 
     let Active911 = function () {
         oauth2 = require('simple-oauth2').create(credentials);
+        this.devices = {};
     };
 
-    Active911.prototype.callApi = function (apiPath, params, successCallback) {
-        successCallback = successCallback || function () {};
-        $.ajax({
-            url: 'https://access.active911.com/interface/open_api/api/' + apiPath,
-            type: 'GET',
-            headers: {
-                Authorization: 'Bearer ' + active911Settings.getOauthToken().access_token
-            },
-            parameters: params,
-            success: successCallback
+    Active911.prototype.agency = {};
+    Active911.prototype.devices = {};
+    Active911.prototype.alerts = {};
+
+    Active911.prototype.cacheAgency = function () {
+        let self = this;
+
+        return this.callApi()
+            .then((json) => {
+                self.agency = json.agency;
+                console.log(self.agency);
+            });
+    };
+
+    Active911.prototype.cacheDevice = function (deviceId) {
+        let self = this;
+
+        return this.callApi('devices/' + deviceId)
+            .then((json) => {
+                console.log(json);
+                self.devices[json.device.id] = json.device;
+            });
+    };
+
+    Active911.prototype.cacheDevices = function () {
+        let self = this;
+
+        return this.cacheAgency()
+            .then(() => {
+            console.log(self.agency);
+                let device;
+                for (let i=0; i<self.agency.devices.length; i++) {
+                    device = self.agency.devices[i];
+                    self.cacheDevice(device.id)
+                        .catch((err) => {
+                            console.error(err);
+                        });
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
+
+    Active911.prototype.callApi = function (apiPath, params) {
+        let path = '/interface/open_api/api';
+        if (typeof apiPath !== 'undefined') path += '/' + apiPath;
+        if (typeof params !== 'undefined' && params !== '') path += '?' + queryString.stringify(params);
+
+        return new Promise((resolve, reject) => {
+            let options = {
+                uri: 'https://access.active911.com' + path,
+                headers: {
+                    'Authorization': 'Bearer ' + active911Settings.getOauthToken().access_token,
+                    'User-Agent': 'Active911-HUD / electron-' + process.versions.electron
+                        + ' (' + os.type() + ' ' + os.release() + ' ' + os.arch() + ')'
+                },
+                json: true
+            };
+            requestPromise(options)
+                .then((json) => {
+                    if (json.result === "success") resolve(json.message);
+                    else reject(json.message);
+                })
+                .catch((err) => {
+                    reject(err.message);
+                });
         });
     };
 
@@ -63,7 +125,23 @@ module.exports = function (active911Settings) {
         else {
             return false;
         }
-    },
+    };
+
+    Active911.prototype.getAgency = function () {
+        return this.agency;
+    };
+
+    Active911.prototype.getAlerts = function () {
+        return this.callApi('alerts');
+    };
+
+    Active911.prototype.getAlert = function (alertId) {
+        return this.callApi('alerts/' + alertId);
+    };
+
+    Active911.prototype.getDevice = function (deviceId) {
+        return this.devices[deviceId];
+    };
 
     Active911.prototype.parseURI = function (str, options) {
         let o = Object.assign({

@@ -12,6 +12,7 @@
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
         const active911Settings = remote.getGlobal('active911Settings');
+        window.$ = window.jQuery = require("jquery");
     </script>
 </head>
 <body id="settings-window">
@@ -50,7 +51,6 @@
         <button id="save" class="btn btn-primary">Save</button>
     </form>
 </div>
-<script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
 <script src="js/lib/popper.min.js"></script>
 <script src="js/lib/bootstrap.min.js"></script>
 <script type="text/javascript">

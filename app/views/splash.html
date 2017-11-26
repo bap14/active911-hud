@@ -10,8 +10,9 @@
     <script>
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
-        let active911Settings = remote.getGlobal('active911Settings');
-        let active911 = remote.getGlobal('active911');
+        let active911Settings = remote.getGlobal('active911Settings'),
+            active911 = remote.getGlobal('active911');
+        window.$ = window.jQuery = require("jquery");
     </script>
 </head>
 <body class="splash-window">
@@ -23,7 +24,6 @@
         </div>
     </div>
 
-    <script>window.$ = window.jQuery = require("../js/lib/jquery.min.js");</script>
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
 
