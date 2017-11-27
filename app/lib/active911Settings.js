@@ -35,6 +35,11 @@ module.exports = function () {
                     access_token: false
                 }
             },
+            active911: {
+                alertsTimeFrame: 15,
+                clearOldAlerts: true,
+                oldAlertThreshold: 86400
+            },
             googleMapsApiKey: '',
             googleMaps: {
                 center: {
@@ -59,6 +64,10 @@ module.exports = function () {
     active911Settings.prototype.get = function (key, defaultValue) {
         const value = util.search(this.config, key);
         return value === undefined ? defaultValue : value;
+    };
+
+    active911Settings.prototype.getAlertsTimeframe = function () {
+        return this.config.active911.alertsTimeFrame;
     };
 
     active911Settings.prototype.getGoogleMapsApiKey = function () {

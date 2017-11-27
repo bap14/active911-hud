@@ -75,6 +75,35 @@
                                data-bind="text: active911auth.token.access_token"></p>
                             <p class="help-block">This token will automatically refresh before it expires.</p>
                         </div>
+                        <div class="form-group">
+                            <label for="active911:alerts-time-frame" class="control-label">Alerts Time Frame</label>
+                            <div class="input-group">
+                                <input id="active911:alerts-time-frame" class="form-control"
+                                       data-bind="text: active911.alertsTimeFrame, value: active911.alertsTimeFrame" />
+                                <span class="input-group-addon">minutes</span>
+                            </div>
+                            <p class="help-block">
+                                Only fetch alerts within the last
+                                <span data-bind="text: active911.alertsTimeFrame"></span> minutes.
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="active911:clear-old-alerts" class="control-label">Clear Old Alerts</label>
+                            <select id="active911:clear-old-alerts" class="form-control"
+                                    data-bind="value: active911.clearOldAlerts">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group" data-dependent="{&quot;active911:clear-old-alerts&quot;: 1}">
+                            <label for="active911:old-alert-threshold" class="control-label">Old Alert Threshold</label>
+                            <select id="active911:old-alert-threshold" class="form-control"
+                                    data-bind="value: active911.oldAlertThreshold">
+                                <option value="1800">30 minutes</option>
+                                <option value="3600">1 hour</option>
+                                <option value="86400">24 hours</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -193,13 +222,34 @@
             e.stopPropagation();
             let settings = ko.mapping.toJS(active911SettingsModel);
             settings.googleMaps.zoom = parseInt(settings.googleMaps.zoom);
-            active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey).set('googleMaps', settings.googleMaps);
+            settings.active911.clearOldAlerts = Boolean(settings.active911.clearOldAlerts).valueOf();
+            active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey)
+                .set('googleMaps', settings.googleMaps)
+                .set('active911', settings.active911);
             active911Settings.save();
 
             active911Map.updateOptions(settings.googleMaps);
             $('#active911\\:close-settings').click();
 
             return false;
+        });
+
+        $('[data-dependent]').each((idx, elem) => {
+            let dependencies = $(elem).data('dependent'),
+                dependent = $(elem);
+            $.each(dependencies, (key) => {
+                let dependency = $('#' + key.replace(':', '\\:')),
+                    dependencyValue = dependencies[key];
+                if (dependency.length) {
+                    if (dependency.val() != dependencyValue) dependent.hide();
+                    else dependent.show();
+
+                    dependency.on('change', (e) => {
+                        if ($(e.target).val() == dependencyValue) dependent.show();
+                        else dependent.hide();
+                    });
+                }
+            });
         });
 
         function googleMapInitializeCallback() {
@@ -212,6 +262,8 @@
             active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
             ko.applyBindings(active911SettingsModel);
 
+            $('[data-dependent]').change();
+
             if (active911Settings.getGoogleMapsApiKey()) {
                 active911Map = new Active911HUDMap(
                     $('#active911\\:map'),
@@ -221,7 +273,6 @@
                 );
             }
 
-            console.log('Caching device data');
             active911.cacheDevices()
                 .then(() => {
                     $('#active911\\:agency').html(active911.getAgency().name);
@@ -232,8 +283,8 @@
                         visible: true
                     });
 
-                    active911.getAlerts().then((alerts) => {
-                       console.log(alerts);
+                    active911.getAlerts(active911Settings.getAlertsTimeframe()).then((alerts) => {
+                        
                     });
                 })
                 .catch((err) => {

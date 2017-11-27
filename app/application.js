@@ -40,6 +40,7 @@ function createHUDWindow() {
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
         hudWindow.show();
+        hudWindow.webContents.openDevTools();
 
         if (splashScreen) {
             splashScreen.close();
