@@ -186,6 +186,15 @@ ipcMain.on('login-failure', (evt, message) => {
 ipcMain.on('console.log', (evt, message) => {
     console.log(message);
 });
+ipcMain.on('active911-agency-updated', () => {
+    hudWindow.send('agency-updated');
+});
+ipcMain.on('active911-alerts-updated', () => {
+    hudWindow.send('alerts-updated');
+});
+ipcMain.on('active911-new-alert', () => {
+    hudWindow.send('new-alert');
+});
 
 ipcMain.on('exit-application', () => {
     app.quit();

@@ -37,8 +37,7 @@ module.exports = function () {
             },
             active911: {
                 alertsTimeFrame: 15,
-                clearOldAlerts: true,
-                oldAlertThreshold: 86400
+                clearOldAlerts: true
             },
             googleMapsApiKey: '',
             googleMaps: {

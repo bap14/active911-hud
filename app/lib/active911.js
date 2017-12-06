@@ -38,7 +38,6 @@ module.exports = function (active911Settings) {
         return this.callApi()
             .then((json) => {
                 self.agency = json.agency;
-                console.log(self.agency);
             });
     };
 
@@ -47,7 +46,6 @@ module.exports = function (active911Settings) {
 
         return this.callApi('devices/' + deviceId)
             .then((json) => {
-                console.log(json);
                 self.devices[json.device.id] = json.device;
             });
     };
@@ -57,7 +55,6 @@ module.exports = function (active911Settings) {
 
         return this.cacheAgency()
             .then(() => {
-            console.log(self.agency);
                 let device;
                 for (let i=0; i<self.agency.devices.length; i++) {
                     device = self.agency.devices[i];
@@ -132,7 +129,22 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.getAlerts = function () {
-        return this.callApi('alerts');
+        this.callApi('alerts', {alert_minutes: active911Settings.getAlertsTimeframe()})
+            .then((response) => {
+                let alerts = response.alerts;
+                for (let i=0; i<alerts.length; i++) {
+                    active911.getAlert(alerts[i].id)
+                        .then((response) => {
+                            updateAlert(response.alert);
+                        })
+                        .catch((err) => {
+                            console.error(err.message, err);
+                        });
+                    return;
+                }
+            });
+
+        return this;
     };
 
     Active911.prototype.getAlert = function (alertId) {
@@ -167,6 +179,42 @@ module.exports = function (active911Settings) {
             if ($1) uri[o.q.name][$1] = $2;
         });
         return uri;
+    };
+
+    Active911.prototype.startup = function () {
+        let that = this;
+
+        this.cacheDevices()
+            .then(() => {
+                ipcMain.send('active911-agency-update');
+            })
+            .catch((err) => {
+                console.error(err.message, err);
+            });
+        this.getAlerts()
+            .then((response) => {
+                let alerts = response.alerts;
+                for (let i=0; i<alerts.length; i++) {
+                    that.getAlert(alerts[i].id)
+                        .then((response) => {
+                            //updateAlert(response.alert);
+                            that.alerts.push(response.alert);
+                        })
+                        .then(() => {
+                            console.log(that.alerts);
+                            ipcMain.send('active911-alerts-updated');
+                        })
+                        .catch((err) => {
+                            console.error(err.message, err);
+                        });
+                }
+            })
+            .catch((err) => {
+                console.error(err.message, err);
+            });
+
+        setTimeout(this.getAlerts, 60 * 1000);
+        setTimeout(this.cacheDevices, 5 * 60 * 1000);
     };
 
     Active911.prototype.validateToken = function () {

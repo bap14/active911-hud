@@ -42,7 +42,7 @@
         <div class="row" id="active911:wrapper">
             <div class="col-lg-6">
                 <div class="row">
-                    <div class="col-lg-12" id="active911:active-alert"></div>
+                    <!--<div class="col-lg-12" id="active911:active-alert"></div>-->
                     <div class="col-lg-12" id="active911:alerts"></div>
                 </div>
             </div>
@@ -95,14 +95,9 @@
                                 <option value="1">Yes</option>
                             </select>
                         </div>
-                        <div class="form-group" data-dependent="{&quot;active911:clear-old-alerts&quot;: 1}">
-                            <label for="active911:old-alert-threshold" class="control-label">Old Alert Threshold</label>
-                            <select id="active911:old-alert-threshold" class="form-control"
-                                    data-bind="value: active911.oldAlertThreshold">
-                                <option value="1800">30 minutes</option>
-                                <option value="3600">1 hour</option>
-                                <option value="86400">24 hours</option>
-                            </select>
+                        <div class="form-group" data-dependent="{&quot;active911:clear-old-alerts&quot;: &quot;1&quot;}">
+                            <label for="active911:clear-old-alerts-limit" class="control-label">Clear Old Alerts Limit</label>
+                            <input id="active911:clear-old-alerts-limit" class="form-control" />
                         </div>
                     </div>
                 </div>
@@ -178,6 +173,23 @@
             </form>
         </div>
     </div>
+    <div id="active911:alert-template" style="display: none;">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="location-name"></h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <address class="col-lg-6"></address>
+                    <p class="col-lg-6 description"></p>
+                </div>
+                <div class="row">
+                    <ul class="responses"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
     <div id="active911:settings-overlay"></div>
 
     <script src="js/lib/popper.min.js"></script>
@@ -185,6 +197,7 @@
     <script src="js/lib/bootstrap-slider.min.js"></script>
     <script src="js/lib/knockout.js"></script>
     <script src="js/knockout.mapping.js"></script>
+    <script src="js/dependent-fields.jquery.js"></script>
     <script src="js/active911HUD.map.js"></script>
     <script>
         let active911Map, active911SettingsModel;
@@ -234,27 +247,44 @@
             return false;
         });
 
-        $('[data-dependent]').each((idx, elem) => {
-            let dependencies = $(elem).data('dependent'),
-                dependent = $(elem);
-            $.each(dependencies, (key) => {
-                let dependency = $('#' + key.replace(':', '\\:')),
-                    dependencyValue = dependencies[key];
-                if (dependency.length) {
-                    if (dependency.val() != dependencyValue) dependent.hide();
-                    else dependent.show();
-
-                    dependency.on('change', (e) => {
-                        if ($(e.target).val() == dependencyValue) dependent.show();
-                        else dependent.hide();
-                    });
-                }
-            });
-        });
-
         function googleMapInitializeCallback() {
             active911Map.initialize();
         }
+
+        function updateAlert(data) {
+            console.log(data);
+            let alert = $('#active911\\:alert-template > .panel').clone(),
+                address = '',
+                dateSent;
+
+            alert.attr('id', 'alert-' + data.id);
+            $('.location-name', alert).text('#' + data.cad_code + ' ' + data.address);
+
+
+            if (data.place) address += data.place + "\n";
+            address += data.address;
+            if (data.unit) address += " " + data.unit;
+            address += "\n" + data.city + ", " + data.state;
+            $('address', alert).text(address);
+
+            $('.description', alert).text(data.description);
+
+            dateSent = new Date(data.sent);
+            console.log(dateSent);
+            $('.timestamp', alert).text(dateSent);
+
+            alert.prependTo('#active911\\:alerts');
+        }
+
+        $(document).on('agency-updated', () => {
+            $('#active911\\:agency').html(active911.getAgency().name);
+
+            active911Map.updateHomeMarker({
+                lat: active911.getAgency().latitude,
+                lng: active911.getAgency().longitude,
+                visible: true
+            });
+        });
 
         $(document).ready(() => {
             $('#active911\\:googleMaps\\:zoom').slider('setValue', active911Settings.config.googleMaps.zoom);
@@ -262,7 +292,7 @@
             active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
             ko.applyBindings(active911SettingsModel);
 
-            $('[data-dependent]').change();
+            $('#active911\\:settings').dependentFields();
 
             if (active911Settings.getGoogleMapsApiKey()) {
                 active911Map = new Active911HUDMap(
@@ -273,6 +303,9 @@
                 );
             }
 
+            active911.startup();
+
+            /*
             active911.cacheDevices()
                 .then(() => {
                     $('#active911\\:agency').html(active911.getAgency().name);
@@ -283,13 +316,28 @@
                         visible: true
                     });
 
-                    active911.getAlerts(active911Settings.getAlertsTimeframe()).then((alerts) => {
-                        
-                    });
+                    active911.getAlerts()
+                        .then((response) => {
+                            let alerts = response.alerts;
+                            for (let i=0; i<alerts.length; i++) {
+                                active911.getAlert(alerts[i].id)
+                                    .then((response) => {
+                                        updateAlert(response.alert);
+                                    })
+                                    .catch((err) => {
+                                        console.error(err.message, err);
+                                    });
+                                return;
+                            }
+                        })
+                        .catch((err) => {
+                            console.error(err.message, err);
+                        });
                 })
                 .catch((err) => {
-                    console.error(err);
+                    console.error(err.message, err);
                 });
+            */
         });
     </script>
 </body>
