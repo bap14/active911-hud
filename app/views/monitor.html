@@ -252,7 +252,6 @@
         }
 
         function updateAlert(data) {
-            console.log(data);
             let alert = $('#active911\\:alert-template > .panel').clone(),
                 address = '',
                 dateSent;
@@ -276,7 +275,13 @@
             alert.prependTo('#active911\\:alerts');
         }
 
-        $(document).on('agency-updated', () => {
+        ipcRenderer.on('alerts-updated', () => {
+            $(active911.alerts).each((i, alert) => {
+                updateAlert(alert);
+            });
+        });
+
+        ipcRenderer.on('agency-updated', () => {
             $('#active911\\:agency').html(active911.getAgency().name);
 
             active911Map.updateHomeMarker({

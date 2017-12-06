@@ -35,7 +35,11 @@ function checkOAuthToken() {
 }
 
 function createHUDWindow() {
-    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, show: false, icon: appIcon, fullscreen: true });
+    let fullScreen = false;
+    if (process.argv.indexOf('--fullscreen') !== false) {
+        fullScreen = true;
+    }
+    hudWindow = new BrowserWindow({ width: 1920, height: 1080, frame: false, show: false, icon: appIcon, fullscreen: fullScreen });
     hudWindow.hide();
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
@@ -119,7 +123,9 @@ function createSettingsWindow(errorMessage) {
 }
 
 app.on('window-all-closed', () => {
-    app.quit();
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 app.on('ready', () => {
     createSplashScreen();
@@ -190,12 +196,12 @@ ipcMain.on('active911-agency-updated', () => {
     hudWindow.send('agency-updated');
 });
 ipcMain.on('active911-alerts-updated', () => {
+    console.log('send:alerts-updated');
     hudWindow.send('alerts-updated');
 });
 ipcMain.on('active911-new-alert', () => {
     hudWindow.send('new-alert');
 });
-
 ipcMain.on('exit-application', () => {
     app.quit();
 });

@@ -30,7 +30,7 @@ module.exports = function (active911Settings) {
 
     Active911.prototype.agency = {};
     Active911.prototype.devices = {};
-    Active911.prototype.alerts = {};
+    Active911.prototype.alerts = [];
 
     Active911.prototype.cacheAgency = function () {
         let self = this;
@@ -129,22 +129,7 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.getAlerts = function () {
-        this.callApi('alerts', {alert_minutes: active911Settings.getAlertsTimeframe()})
-            .then((response) => {
-                let alerts = response.alerts;
-                for (let i=0; i<alerts.length; i++) {
-                    active911.getAlert(alerts[i].id)
-                        .then((response) => {
-                            updateAlert(response.alert);
-                        })
-                        .catch((err) => {
-                            console.error(err.message, err);
-                        });
-                    return;
-                }
-            });
-
-        return this;
+        return this.callApi('alerts', {alert_minutes: active911Settings.getAlertsTimeframe()});
     };
 
     Active911.prototype.getAlert = function (alertId) {
@@ -182,27 +167,27 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.startup = function () {
-        let that = this;
+        var that = this;
 
         this.cacheDevices()
             .then(() => {
-                ipcMain.send('active911-agency-update');
+                ipcMain.emit('active911-agency-updated');
             })
             .catch((err) => {
                 console.error(err.message, err);
             });
+
         this.getAlerts()
             .then((response) => {
                 let alerts = response.alerts;
+                that.alerts = [];
                 for (let i=0; i<alerts.length; i++) {
                     that.getAlert(alerts[i].id)
                         .then((response) => {
-                            //updateAlert(response.alert);
                             that.alerts.push(response.alert);
                         })
                         .then(() => {
-                            console.log(that.alerts);
-                            ipcMain.send('active911-alerts-updated');
+                            ipcMain.emit('active911-alerts-updated');
                         })
                         .catch((err) => {
                             console.error(err.message, err);
@@ -213,8 +198,8 @@ module.exports = function (active911Settings) {
                 console.error(err.message, err);
             });
 
-        setTimeout(this.getAlerts, 60 * 1000);
-        setTimeout(this.cacheDevices, 5 * 60 * 1000);
+        setTimeout((() => { this.getAlerts(); }).bind(this), 60 * 1000);
+        setTimeout((() => { this.cacheDevices(); }).bind(this), 5 * 60 * 1000);
     };
 
     Active911.prototype.validateToken = function () {
