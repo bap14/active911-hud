@@ -196,7 +196,6 @@ ipcMain.on('active911-agency-updated', () => {
     hudWindow.send('agency-updated');
 });
 ipcMain.on('active911-alerts-updated', () => {
-    console.log('send:alerts-updated');
     hudWindow.send('alerts-updated');
 });
 ipcMain.on('active911-new-alert', () => {

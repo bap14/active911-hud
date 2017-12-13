@@ -179,23 +179,40 @@ module.exports = function (active911Settings) {
 
         this.getAlerts()
             .then((response) => {
-                let alerts = response.alerts;
+                let alerts = response.alerts,
+                    promises = [];
                 that.alerts = [];
-                for (let i=0; i<alerts.length; i++) {
-                    that.getAlert(alerts[i].id)
-                        .then((response) => {
-                            that.alerts.push(response.alert);
-                        })
-                        .then(() => {
-                            ipcMain.emit('active911-alerts-updated');
-                        })
-                        .catch((err) => {
-                            console.error(err.message, err);
+                    for (let i=0; i<alerts.length; i++) {
+                        promises.push(
+                            that.getAlert(alerts[i].id)
+                                .then((response) => {
+                                    response.alert.received = new Date(response.alert.received + " UTC");
+                                    response.alert.sent = new Date(response.alert.sent + " UTC");
+
+                                    console.log('Adding new alert to array');
+                                    that.alerts.push(response.alert);
+                                })
+                                .catch((err) => {
+                                    console.error(err);
+                                })
+                        );
+                    }
+                Promise.all(promises)
+                    .then(() => {
+                        console.log('starting comparison');
+                        that.alerts.sort((a, b) => {
+                            console.log('comparing a and b');
+                            if (a.received.getTime() === b.received.getTime()) return 0;
+                            return (a.received.getTime() < b.received.getTime()) ? -1 : 1;
                         });
-                }
+
+                        console.log('Sending alerts-updated');
+                        console.log(that.alerts);
+                        ipcMain.emit('active911-alerts-updated');
+                    });
             })
             .catch((err) => {
-                console.error(err.message, err);
+                console.error(err.message);
             });
 
         setTimeout((() => { this.getAlerts(); }).bind(this), 60 * 1000);

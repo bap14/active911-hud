@@ -252,13 +252,20 @@
         }
 
         function updateAlert(data) {
-            let alert = $('#active911\\:alert-template > .panel').clone(),
+            let alert,
+                existing = true,
+                template = $('#active911\\:alert-template > .panel').clone(),
                 address = '',
                 dateSent;
 
-            alert.attr('id', 'alert-' + data.id);
-            $('.location-name', alert).text('#' + data.cad_code + ' ' + data.address);
+            alert = $('#alert-' + data.id);
+            if (alert.length === 0) {
+                existing = false;
+                alert = template;
+                alert.attr('id', 'alert-' + data.id);
+            }
 
+            $('.location-name', alert).text('#' + data.cad_code + ' ' + data.address);
 
             if (data.place) address += data.place + "\n";
             address += data.address;
@@ -268,17 +275,30 @@
 
             $('.description', alert).text(data.description);
 
-            dateSent = new Date(data.sent);
-            console.log(dateSent);
-            $('.timestamp', alert).text(dateSent);
+            $('.timestamp', alert).text(data.received);
 
-            alert.prependTo('#active911\\:alerts');
+            if (!existing) alert.appendTo('#active911\\:alerts');
         }
 
         ipcRenderer.on('alerts-updated', () => {
+            /*
+            active911.alerts.sort((a, b) => {
+                if (a.received === b.received) return 0;
+                return (a.received < b.received) ? -1 : 1;
+            });
+            */
+
             $(active911.alerts).each((i, alert) => {
+                console.log('#' + alert.cad_code + ' :: ' + alert.received);
                 updateAlert(alert);
             });
+
+
+            /*$(active911.alerts).each((i, alert) => {
+                console.log(alert.id + ' #' + alert.cad_code + ' :: ' + alert.received);
+                updateAlert(alert);
+            });
+            */
         });
 
         ipcRenderer.on('agency-updated', () => {
@@ -309,40 +329,6 @@
             }
 
             active911.startup();
-
-            /*
-            active911.cacheDevices()
-                .then(() => {
-                    $('#active911\\:agency').html(active911.getAgency().name);
-
-                    active911Map.updateHomeMarker({
-                        lat: active911.getAgency().latitude,
-                        lng: active911.getAgency().longitude,
-                        visible: true
-                    });
-
-                    active911.getAlerts()
-                        .then((response) => {
-                            let alerts = response.alerts;
-                            for (let i=0; i<alerts.length; i++) {
-                                active911.getAlert(alerts[i].id)
-                                    .then((response) => {
-                                        updateAlert(response.alert);
-                                    })
-                                    .catch((err) => {
-                                        console.error(err.message, err);
-                                    });
-                                return;
-                            }
-                        })
-                        .catch((err) => {
-                            console.error(err.message, err);
-                        });
-                })
-                .catch((err) => {
-                    console.error(err.message, err);
-                });
-            */
         });
     </script>
 </body>
