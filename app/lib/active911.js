@@ -189,7 +189,6 @@ module.exports = function (active911Settings) {
                                     response.alert.received = new Date(response.alert.received + " UTC");
                                     response.alert.sent = new Date(response.alert.sent + " UTC");
 
-                                    console.log('Adding new alert to array');
                                     that.alerts.push(response.alert);
                                 })
                                 .catch((err) => {
@@ -199,15 +198,11 @@ module.exports = function (active911Settings) {
                     }
                 Promise.all(promises)
                     .then(() => {
-                        console.log('starting comparison');
                         that.alerts.sort((a, b) => {
-                            console.log('comparing a and b');
                             if (a.received.getTime() === b.received.getTime()) return 0;
-                            return (a.received.getTime() < b.received.getTime()) ? -1 : 1;
+                            return (a.received.getTime() > b.received.getTime()) ? -1 : 1;
                         });
 
-                        console.log('Sending alerts-updated');
-                        console.log(that.alerts);
                         ipcMain.emit('active911-alerts-updated');
                     });
             })
