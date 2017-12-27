@@ -280,25 +280,39 @@
             if (!existing) alert.appendTo('#active911\\:alerts');
         }
 
-        ipcRenderer.on('alerts-updated', () => {
-            /*
-            active911.alerts.sort((a, b) => {
-                if (a.received === b.received) return 0;
-                return (a.received < b.received) ? -1 : 1;
-            });
-            */
+        function updateGoogleRoute(incident) {
+            if (typeof incident === "undefined") {
+                active911Map.updateHomeMarker({
+                    lat: active911.getAgency().latitude,
+                    lng: active911.getAgency().longitude,
+                    visible: false
+                });
+            }
+            else {
+                let destination;
+                if (active911.activeAlert.latitude && active911.activeAlert.longitude) {
+                    destination = { lat: active911.activeAlert.latitude, lng: active911.activeAlert.longitude };
+                }
+                else {
+                    destination = active911.activeAlert.address + ' ' + active911.activeAlert.city + ' ';
+                    destination += active911.activeAlert.state;
+                }
 
+                active911Map.drawRoute(destination);
+            }
+        }
+
+        ipcRenderer.on('alerts-updated', () => {
             $(active911.alerts).each((i, alert) => {
                 console.log('#' + alert.cad_code + ' :: ' + alert.received);
                 updateAlert(alert);
             });
 
+            active911.setActiveAlert();
 
-            /*$(active911.alerts).each((i, alert) => {
-                console.log(alert.id + ' #' + alert.cad_code + ' :: ' + alert.received);
-                updateAlert(alert);
-            });
-            */
+            $('#alert-' + active911.activeAlert.id).addClass('panel-primary');
+
+            updateGoogleRoute();
         });
 
         ipcRenderer.on('agency-updated', () => {

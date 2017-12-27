@@ -25,6 +25,7 @@ module.exports = function (active911Settings) {
 
     let Active911 = function () {
         oauth2 = require('simple-oauth2').create(credentials);
+        this.activeAlert = null;
         this.devices = {};
     };
 
@@ -164,6 +165,15 @@ module.exports = function (active911Settings) {
             if ($1) uri[o.q.name][$1] = $2;
         });
         return uri;
+    };
+
+    Active911.prototype.setActiveAlert = function () {
+        if (this.alerts.length > 0) {
+            this.activeAlert = this.alerts[0];
+        }
+        else {
+            this.activeAlert = null;
+        }
     };
 
     Active911.prototype.startup = function () {
