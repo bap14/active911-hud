@@ -181,7 +181,6 @@ ipcMain.on('settings-saved', () => {
         splashScreen.send('add-update-message', 100);
         createHUDWindow();
     } else {
-        // Reinitialize with new settings
         hudWindow.close();
         createSplashScreen();
     }
@@ -203,4 +202,7 @@ ipcMain.on('active911-new-alert', () => {
 });
 ipcMain.on('exit-application', () => {
     app.quit();
+});
+ipcMain.on('launch-google', () => {
+    electron.shell.openExternal('https://console.developers.google.com/apis/credentials');
 });

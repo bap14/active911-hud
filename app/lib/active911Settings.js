@@ -36,8 +36,11 @@ module.exports = function () {
                 }
             },
             active911: {
-                alertsTimeFrame: 15,
-                clearOldAlerts: true
+                alerts: {
+                    activeAlertAge: 15,
+                    clearAfter: 30,
+                    timeFrame: 30
+                }
             },
             googleMapsApiKey: '',
             googleMaps: {
@@ -66,7 +69,7 @@ module.exports = function () {
     };
 
     active911Settings.prototype.getAlertsTimeframe = function () {
-        return this.config.active911.alertsTimeFrame;
+        return this.config.active911.alerts.timeFrame;
     };
 
     active911Settings.prototype.getGoogleMapsApiKey = function () {

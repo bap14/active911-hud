@@ -6,19 +6,21 @@
     <title>Active911 HUD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
-    <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" />
+    <!-- <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" /> -->
     <link rel="stylesheet" href="styles/lib/bootstrap-slider.min.css" />
+    <link rel="stylesheet" href="styles/lib/octicons.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
+        const octicons = require('octicons');
         let active911Settings = remote.getGlobal('active911Settings'),
             active911 = remote.getGlobal('active911');
         window.$ = window.jQuery = require("jquery");
     </script>
 </head>
 <body id="active911-hud">
-    <nav class="navbar navbar-default navbar-static-top">
+    <nav class="navbar navbar-expand sticky-top bg-light">
         <div class="container-fluid">
             <div class="navbar-header">
                 <h3 class="navbar-brand">
@@ -26,13 +28,13 @@
                     <span id="active911:agency">Active911 HUD</span>
                 </h3>
             </div>
-            <div id="navbar" class="navbar-collapse collapse">
+            <div id="navbar" class="collapse navbar-collapse">
                 <p class="navbar-right">
-                    <button class="btn btn-default btn-info navbar-btn" type="button" id="active911:open-settings">
-                        <span class="glyphicon glyphicon-cog"></span>
+                    <button class="btn btn-info" type="button" id="active911:open-settings">
+                        <script>document.write(octicons.gear.toSVG({ "height": 22 }))</script>
                     </button>
-                    <button class="btn btn-danger navbar-btn" type="button" id="active911:exit">
-                        <span class="glyphicon glyphicon-remove"></span>
+                    <button class="btn btn-danger" type="button" id="active911:exit">
+                        <script>document.write(octicons.x.toSVG({ "height": 22 }))</script>
                     </button>
                 </p>
             </div>
@@ -41,81 +43,102 @@
     <div class="container-fluid">
         <div class="row" id="active911:wrapper">
             <div class="col-lg-6">
+                <div class="navbar navbar-expand-lg bg-danger">
+                    <div class="navbar-text">
+                        <h2>Active Alert</h2>
+                    </div>
+                </div>
                 <div class="row">
-                    <!--<div class="col-lg-12" id="active911:active-alert"></div>-->
-                    <div class="col-lg-12" id="active911:alerts"></div>
+
+                    <div class="progress alert-line">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                             aria-valuenow="100" aria-valuemin="100" aria-valuemax="100"></div>
+                    </div>
+                    <div class="col-lg-12 h-50" id="active911:active-alert"></div>
+                    <!-- <div class="col-lg-12" id="active911:alerts"></div> -->
                 </div>
             </div>
             <div class="col-lg-6" id="active911:map"></div>
         </div>
     </div>
-    <div id="active911:settings">
-        <nav class="navbar navbar-inverse navbar-static-top">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <h3 class="navbar-brand">
-                        <button class="btn btn-danger navbar-btn" id="active911:close-settings">
-                            <span class="glyphicon glyphicon-remove"></span>
-                        </button>
-                        Settings
-                    </h3>
-                </div>
+    <div id="active911:settings" class="bg-light">
+        <nav class="navbar sticky-top bg-dark">
+            <div class="navbar-header">
+                <h3 class="navbar-brand">
+                    <button class="btn btn-danger navbar-btn" id="active911:close-settings">
+                        <script>document.write(octicons.x.toSVG({ "height": 22 }))</script>
+                    </button>
+                    <span class="text-light">Settings</span>
+                </h3>
             </div>
         </nav>
         <div class="container-fluid">
             <form>
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Active911 Settings</h3>
-                    </div>
-                    <div class="panel-body">
+                <div class="card my-3">
+                    <h3 class="card-header">Active911 Settings</h3>
+                    <div class="card-body">
                         <div class="form-group">
-                            <label for="active911:token" class="control-label">Access Token</label>
-                            <p id="active911:token" class="form-control-static"
-                               data-bind="text: active911auth.token.access_token"></p>
-                            <p class="help-block">This token will automatically refresh before it expires.</p>
+                            <label for="active911:token">Access Token</label>
+                            <input id="active911:token" class="form-control-plaintext"
+                               data-bind="text: active911auth.token.access_token, value: active911auth.token.access_token" readonly />
+                            <p class="form-text text-muted">This token will automatically refresh before it expires.</p>
                         </div>
-                        <div class="form-group">
-                            <label for="active911:alerts-time-frame" class="control-label">Alerts Time Frame</label>
+                        <div class="form-group mb-3">
+                            <label for="active911:alerts-time-frame">Alerts Time Frame</label>
                             <div class="input-group">
                                 <input id="active911:alerts-time-frame" class="form-control"
-                                       data-bind="text: active911.alertsTimeFrame, value: active911.alertsTimeFrame" />
-                                <span class="input-group-addon">minutes</span>
+                                       data-bind="text: active911.alerts.timeFrame, value: active911.alerts.timeFrame" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">minutes</span>
+                                </div>
                             </div>
-                            <p class="help-block">
-                                Only fetch alerts within the last
-                                <span data-bind="text: active911.alertsTimeFrame"></span> minutes.
+                            <p class="form-text text-muted">Load alerts within the last
+                                <span data-bind="text: active911.alertsTimeFrame"></span> minutes
                             </p>
                         </div>
-                        <div class="form-group">
-                            <label for="active911:clear-old-alerts" class="control-label">Clear Old Alerts</label>
-                            <select id="active911:clear-old-alerts" class="form-control"
-                                    data-bind="value: active911.clearOldAlerts">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
+                        <div class="form-group mb-3">
+                            <label for="active911:active-alert-age">Active Alert Age</label>
+                            <div class="input-group">
+                                <input id="active911:active-alert-age" class="form-control"
+                                       data-bind="text: active911.alerts.activeAlertAge, value: active911.alerts.activeAlertAge" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">minutes</span>
+                                </div>
+                            </div>
+                            <p class="form-text text-muted">Remove alerts from alert list after this age</p>
                         </div>
+                        <div class="form-group mb-3">
+                            <label for="active911:clear-alerts-after">Clear Old Alerts</label>
+                            <div class="input-group">
+                                <input id="active911:clear-alerts-after" class="form-control"
+                                       data-bind="text: active911.alerts.clearAfter, value: active911.alerts.clearAfter" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">minutes</span>
+                                </div>
+                            </div>
+                            <p class="form-text text-muted">Remove alerts from alert list after this age</p>
+                        </div>
+                        <!--
                         <div class="form-group" data-dependent="{&quot;active911:clear-old-alerts&quot;: &quot;1&quot;}">
                             <label for="active911:clear-old-alerts-limit" class="control-label">Clear Old Alerts Limit</label>
                             <input id="active911:clear-old-alerts-limit" class="form-control" />
                         </div>
+                        -->
                     </div>
                 </div>
 
-                <div class="panel panel-success">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Google Maps Settings</h3>
-                    </div>
-                    <div class="panel-body">
+                <div class="card my-3">
+                    <h3 class="card-header">Google Maps Settings</h3>
+                    <div class="card-body">
                         <div class="form-group">
                             <label for="active911:google-maps-api" class="control-label">API Key</label>
                             <input class="form-control"
                                    id="active911:google-maps-api"
                                    data-bind="value: googleMapsApiKey"
                                    placeholder="AIzaSyAyyhI02wTeD6FE5NTx_WH06Qcj5p7NaJk" />
-                            <p class="help-block">
+                            <p class="form-text text-muted">
                                 Get your google maps API key by following the instructions found
-                                <button id="launch-google" class="btn btn-default btn-xs">here</button>.
+                                <span id="launch-google" class="text-info">here</span>.
                             </p>
                         </div>
                         <div class="form-group">
@@ -126,8 +149,8 @@
                                        placeholder="1600 Pennsylvania Ave, Washington D.C. 20202"
                                        data-bind="text: googleMaps.centerAddress, value: googleMaps.centerAddress" />
                                 <span class="input-group-btn">
-                                    <button class="btn btn-default" id="active911:google-maps:lookup-location">
-                                        <span class="glyphicon glyphicon-search"></span>
+                                    <button class="btn btn-info" id="active911:google-maps:lookup-location">
+                                        <script>document.write(octicons.search.toSVG({ "height": 22 }))</script>
                                         <span class="sr-only">Lookup</span>
                                     </button>
                                 </span>
@@ -143,7 +166,13 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="active911:googleMaps:zoom" class="control-label">Zoom Level</label>
+                            <label for="active911:googleMaps:zoom"
+                                   class="form-text control-label"
+                                   id="active911:googleMaps:zoom-value">
+                                Zoom Level:
+                                <span class="text-success font-weight-bold"></span>
+                            </label>
+                            <span class="text-info">Farther</span>
                             <input class="form-control"
                                    id="active911:googleMaps:zoom"
                                    data-bind="value: googleMaps.zoom"
@@ -153,6 +182,8 @@
                                    data-slider-step="1"
                                    data-slider-value="7"
                             />
+                            <span class="text-info">Closer</span>
+                            <p class="form-text text-muted">Use the slider above to change the zoom level of the map.</p>
                         </div>
                         <div class="form-group">
                             <label for="active911:googleMaps:mapTypeId" class="control-label">Map Type</label>
@@ -281,7 +312,8 @@
         }
 
         function updateGoogleRoute(incident) {
-            if (typeof incident === "undefined") {
+            if (typeof incident === "undefined" || incident === null) {
+                // Recenter the map clearing everything else
                 active911Map.updateHomeMarker({
                     lat: active911.getAgency().latitude,
                     lng: active911.getAgency().longitude,
@@ -310,9 +342,10 @@
 
             active911.setActiveAlert();
 
-            $('#alert-' + active911.activeAlert.id).addClass('panel-primary');
-
-            updateGoogleRoute();
+            if (active911.activeAlert !== null) {
+                $('#alert-' + active911.activeAlert.id).addClass('panel-primary');
+                updateGoogleRoute(active911.activeAlert);
+            }
         });
 
         ipcRenderer.on('agency-updated', () => {
@@ -326,7 +359,17 @@
         });
 
         $(document).ready(() => {
+            $('#active911\\:googleMaps\\:zoom-value > span').text(active911Settings.config.googleMaps.zoom);
             $('#active911\\:googleMaps\\:zoom').slider('setValue', active911Settings.config.googleMaps.zoom);
+
+            $('#active911\\:googleMaps\\:zoom').on('slide', function (slideEvt) {
+                $('#active911\\:googleMaps\\:zoom-value > span').text(slideEvt.value);
+            });
+
+            $('#launch-google').on('click', function (e) {
+                e.preventDefault();
+                ipcRenderer.send('launch-google');
+            });
 
             active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
             ko.applyBindings(active911SettingsModel);
@@ -338,7 +381,8 @@
                     $('#active911\\:map'),
                     active911Settings.getGoogleMapsApiKey(),
                     "googleMapInitializeCallback",
-                    active911Settings.config.googleMaps
+                    active911Settings.config.googleMaps,
+                    active911Settings.config.active911.alerts
                 );
             }
 

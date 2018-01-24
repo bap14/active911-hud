@@ -14,11 +14,11 @@ gulp.task('prepare', () => {
         .pipe(gulp.dest('app/styles'));
 
     gulp.src([
-        'bower_components/bootstrap/dist/css/bootstrap.min.css',
-        'bower_components/bootstrap/dist/css/bootstrap-theme.min.css'
+        'bower_components/bootstrap/dist/css/bootstrap.min.css' // ,
+        // 'bower_components/bootstrap/dist/css/bootstrap-theme.min.css'
     ]).pipe(gulp.dest('app/styles'));
 
-    gulp.src('bower_components/bootstrap/dist/fonts/*').pipe(gulp.dest('app/fonts'));
+    // gulp.src('bower_components/bootstrap/dist/fonts/*').pipe(gulp.dest('app/fonts'));
 
     gulp.src([
         'bower_components/jquery/dist/jquery.min.js',

@@ -169,7 +169,9 @@ module.exports = function (active911Settings) {
 
     Active911.prototype.setActiveAlert = function () {
         if (this.alerts.length > 0) {
-            this.activeAlert = this.alerts[0];
+            let alert = this.alerts[0];
+            // TODO: Compare alert.received to Date.getTime() - settings.alerts.activeAlertAge?
+            this.activeAlert = alert;
         }
         else {
             this.activeAlert = null;
