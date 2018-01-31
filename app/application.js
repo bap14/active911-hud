@@ -31,7 +31,8 @@ global.active911 = require('./lib/active911.js')(global.active911Settings);
 function checkOAuthToken() {
     let auth = active911Settings.get('active911auth'),
         expiresAt = new Date(auth.token.expires_at);
-    console.log(expiresAt);
+
+    // TODO: Start timer to check OAuth token every 120 minutes
 }
 
 function createHUDWindow() {
@@ -44,7 +45,7 @@ function createHUDWindow() {
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
         hudWindow.show();
-        hudWindow.webContents.openDevTools();
+        // hudWindow.webContents.openDevTools();
 
         if (splashScreen) {
             splashScreen.close();

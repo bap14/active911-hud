@@ -6,7 +6,6 @@
     <title>Active911 HUD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
-    <!-- <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" /> -->
     <link rel="stylesheet" href="styles/lib/bootstrap-slider.min.css" />
     <link rel="stylesheet" href="styles/lib/octicons.css" />
     <link rel="stylesheet" href="styles/style.css" />
@@ -14,6 +13,7 @@
         const remote = require('electron').remote;
         const ipcRenderer = require('electron').ipcRenderer;
         const octicons = require('octicons');
+        const {sprintf} = require('sprintf-js');
         let active911Settings = remote.getGlobal('active911Settings'),
             active911 = remote.getGlobal('active911');
         window.$ = window.jQuery = require("jquery");
@@ -30,6 +30,7 @@
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <p class="navbar-right">
+                    <span id="current-time"></span>
                     <button class="btn btn-info" type="button" id="active911:open-settings">
                         <script>document.write(octicons.gear.toSVG({ "height": 22 }))</script>
                     </button>
@@ -282,6 +283,9 @@
             active911Map.initialize();
         }
 
+        function showActiveAlert() {
+        }
+
         function updateAlert(data) {
             let alert,
                 existing = true,
@@ -313,7 +317,6 @@
 
         function updateGoogleRoute(incident) {
             if (typeof incident === "undefined" || incident === null) {
-                // Recenter the map clearing everything else
                 active911Map.updateHomeMarker({
                     lat: active911.getAgency().latitude,
                     lng: active911.getAgency().longitude,
@@ -322,21 +325,32 @@
             }
             else {
                 let destination;
-                if (active911.activeAlert.latitude && active911.activeAlert.longitude) {
-                    destination = { lat: active911.activeAlert.latitude, lng: active911.activeAlert.longitude };
+                if (incident.latitude && incident.longitude) {
+                    destination = { lat: incident.latitude, lng: incident.longitude };
+                    active911Map.drawRoute(destination);
                 }
                 else {
-                    destination = active911.activeAlert.address + ' ' + active911.activeAlert.city + ' ';
-                    destination += active911.activeAlert.state;
+                    destination = incident.address + ' ' + incident.city + ' ' + incident.state;
+
+                    active911Map.geocodeAddress(destination).then((result) => {
+                        active911Map.drawRoute(result.geometry.location);
+                    });
                 }
 
-                active911Map.drawRoute(destination);
+
             }
+        }
+
+        function updateTimer() {
+            let date = new Date();
+            $('#current-time').html(
+                sprintf('%2d:%02d:%02d', date.getHours(), date.getMinutes(), date.getSeconds())
+            );
+            setTimeout(updateTimer, 250);
         }
 
         ipcRenderer.on('alerts-updated', () => {
             $(active911.alerts).each((i, alert) => {
-                console.log('#' + alert.cad_code + ' :: ' + alert.received);
                 updateAlert(alert);
             });
 
@@ -345,6 +359,7 @@
             if (active911.activeAlert !== null) {
                 $('#alert-' + active911.activeAlert.id).addClass('panel-primary');
                 updateGoogleRoute(active911.activeAlert);
+                showActiveAlert();
             }
         });
 
@@ -361,6 +376,8 @@
         $(document).ready(() => {
             $('#active911\\:googleMaps\\:zoom-value > span').text(active911Settings.config.googleMaps.zoom);
             $('#active911\\:googleMaps\\:zoom').slider('setValue', active911Settings.config.googleMaps.zoom);
+
+            updateTimer();
 
             $('#active911\\:googleMaps\\:zoom').on('slide', function (slideEvt) {
                 $('#active911\\:googleMaps\\:zoom-value > span').text(slideEvt.value);

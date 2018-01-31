@@ -16,6 +16,7 @@ var Active911HUDMap;
     Active911HUDMap.prototype = {
         activeAlertTimer: null,
         geocoder: null,
+        homeMarker: null,
         mapElem: null,
         googleMap: null,
         mapOptions: {
@@ -24,13 +25,36 @@ var Active911HUDMap;
             zoom: 12
         },
 
+        clearHomeMarker: function () {
+            if (this.homeMarker instanceof google.maps.Marker) {
+                this.homeMarker.setMap(null);
+            }
+            return this;
+        },
+
         clearRoute: function () {
             this.directionsRenderer.setDirections({routes: []});
             this.googleMap.setOptions(this.mapOptions);
         },
 
         drawRoute: function (destination) {
-            destination = new google.maps.LatLng(destination.lat, destination.lng);
+            if (typeof destination !== "object") {
+                throw "Expecting LatLng or LatLngLiteral object";
+            }
+
+            if (!(destination instanceof google.maps.LatLng)) {
+                if (!destination.lat || !destination.lng) {
+                    throw "Destination object missing 'lat' or 'lng' definition";
+                }
+
+                destination = new google.maps.LatLng({
+                    lat: parseFloat(destination.lat),
+                    lng: parseFloat(destination.lng)
+                });
+            }
+
+            this.clearHomeMarker();
+
             let directionReq = {
                 origin: this.mapOptions.center,
                 destination: destination,
@@ -51,6 +75,20 @@ var Active911HUDMap;
             });
         },
 
+        geocodeAddress: function (address) {
+            return new Promise((resolve, reject) => {
+                let geocoder = new google.maps.Geocoder();
+
+                geocoder.geocode({ address: address }, (result, status) => {
+                    if (status === google.maps.GeocoderStatus.OK) {
+                        resolve(result);
+                    } else {
+                        reject(status);
+                    }
+                });
+            });
+        },
+
         initialize: function () {
             this.googleMap = new google.maps.Map($(this.mapElem)[0], this.mapOptions);
             this.geocoder = new google.maps.Geocoder();
@@ -66,7 +104,7 @@ var Active911HUDMap;
         startActiveAlertTimer: function () {
             this.activeAlertTimer = setTimeout(
                 $.proxy(this.clearRoute, this),
-                this.alertSettings.activeAlertAge
+                this.alertSettings.activeAlertAge * (1000 * 60)
             );
         },
 
@@ -78,6 +116,7 @@ var Active911HUDMap;
         },
 
         updateHomeMarker: function (config) {
+            this.homeMarker.setMap(this.googleMap);
             this.homeMarker.setOptions(config);
         },
 
