@@ -1,10 +1,7 @@
 .idea
 node_modules
 bower_components
-app/js/bootstrap.min.js
-app/js/jquery.min.js
-app/js/popper.min.js
-app/js/popper-utils.min.js
+app/js/lib/*
 app/styles/bootstrap.min.css
 app/styles/bootstrap-theme.min.css
-app/fonts/*
+app/styles/*
