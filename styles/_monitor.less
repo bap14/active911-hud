@@ -7,6 +7,22 @@ body#active911-hud {
   >nav {
     margin-bottom: 0;
     -webkit-app-region: drag;
+
+    .navbar-center {
+      h2 {
+        display: none;
+      }
+    }
+  }
+
+  >nav.bg-active-alert {
+    color: white;
+
+    .navbar-center {
+      h2 {
+        display: block;
+      }
+    }
   }
 
   nav {
@@ -24,8 +40,12 @@ body#active911-hud {
       }
     }
 
+    div.navbar-center {
+      margin: 0 auto;
+    }
+
     p.navbar-right {
-      margin-left: auto;
+      margin-left: 0;
       margin-right: 0;
 
       span#current-time {
@@ -139,14 +159,32 @@ body#active911-hud {
   }
 
   #active911\:wrapper {
-    .alert-line {
-      margin-top: -20px;
-      border-radius: 0;
+    #active911\:active-alert-container {
+      .card {
+        margin-top: 15px;
 
-      .progress-bar-striped {
-        background-image: linear-gradient(45deg, #00f 25%, #f00, #f00, #00f, #00f, #f00, #f00);
-        width: 100%;
+        address {
+          white-space: pre;
+        }
       }
     }
   }
+
+  #active911\:active-alert-template,
+  #active911\:alert-list-template {
+    display: none;
+  }
+}
+
+.bg-active-alert {
+  background: linear-gradient(270deg, #0055ca, #f70000);
+  background-size: 400% 400%;
+  animation: FlashingLights 0.9s ease infinite;
+}
+
+@keyframes FlashingLights {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  1000% { background-position: 0% 50% }
+
 }

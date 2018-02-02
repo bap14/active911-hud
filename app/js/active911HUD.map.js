@@ -1,7 +1,8 @@
 "use strict";
 var Active911HUDMap;
 (function ($) {
-    Active911HUDMap = function (elem, apiKey, callback, mapOptions, alertSettings) {
+    Active911HUDMap = function (active911, elem, apiKey, callback, mapOptions, alertSettings) {
+        this.active911 = active911;
         this.mapElem = $(elem);
         this.mapOptions = $.extend(this.mapOptions, mapOptions || {});
         this.alertSettings = $.extend({}, alertSettings || {});
@@ -11,6 +12,8 @@ var Active911HUDMap;
         script.async = true;
         script.defer = true;
         document.getElementsByTagName('body')[0].appendChild(script);
+
+        this.active911.on('active-alert-timer-stopped', $.proxy(this.clearRoute, this));
     };
 
     Active911HUDMap.prototype = {
@@ -61,13 +64,13 @@ var Active911HUDMap;
                 travelMode: google.maps.TravelMode.DRIVING,
                 provideRouteAlternatives: false
             };
-            var that = this;
+            var self = this;
             let directions = new google.maps.DirectionsService();
             directions.route(directionReq, function (result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
-                    that.directionsRenderer.setDirections(result);
-                    that.stopActiveAlertTimer();
-                    that.startActiveAlertTimer();
+                    self.directionsRenderer.setDirections(result);
+                    self.active911.stopActiveAlertTimer();
+                    self.active911.startActiveAlertTimer();
                 }
                 else {
                     console.error(status);
@@ -99,20 +102,6 @@ var Active911HUDMap;
                 position: this.mapOptions.center,
                 map: this.googleMap
             });
-        },
-
-        startActiveAlertTimer: function () {
-            this.activeAlertTimer = setTimeout(
-                $.proxy(this.clearRoute, this),
-                this.alertSettings.activeAlertAge * (1000 * 60)
-            );
-        },
-
-        stopActiveAlertTimer: function () {
-            if (this.activeAlertTimer !== null) {
-                clearTimeout(this.activeAlertTimer);
-                this.activeAlertTimer = null;
-            }
         },
 
         updateHomeMarker: function (config) {

@@ -1,6 +1,8 @@
 "use strict";
 
 module.exports = function (active911Settings) {
+    const util = require('util');
+    const EventEmitter = require('events');
     const app = require('electron').app;
     const ipcMain = require('electron').ipcMain;
     const os = require('os');
@@ -28,6 +30,8 @@ module.exports = function (active911Settings) {
         this.activeAlert = null;
         this.devices = {};
     };
+
+    util.inherits(Active911, EventEmitter);
 
     Active911.prototype.agency = {};
     Active911.prototype.devices = {};
@@ -224,6 +228,23 @@ module.exports = function (active911Settings) {
 
         setTimeout((() => { this.getAlerts(); }).bind(this), 60 * 1000);
         setTimeout((() => { this.cacheDevices(); }).bind(this), 5 * 60 * 1000);
+    };
+
+    Active911.prototype.startActiveAlertTimer = function () {
+        let self = this;
+        this.emit('active-alert-timer-start');
+        this.activeAlertTimer = setTimeout(
+            self.stopActiveAlertTimer.bind(self),
+            active911Settings.config.active911.alerts.activeAlertAge * (1000 * 60)
+        );
+    };
+
+    Active911.prototype.stopActiveAlertTimer = function () {
+        if (this.activeAlertTimer !== null) {
+            this.emit('active-alert-timer-stop');
+            clearTimeout(this.activeAlertTimer);
+            this.activeAlertTimer = null;
+        }
     };
 
     Active911.prototype.validateToken = function () {
