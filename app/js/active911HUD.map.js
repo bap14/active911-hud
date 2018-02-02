@@ -12,8 +12,6 @@ var Active911HUDMap;
         script.async = true;
         script.defer = true;
         document.getElementsByTagName('body')[0].appendChild(script);
-
-        this.active911.on('active-alert-timer-stopped', $.proxy(this.clearRoute, this));
     };
 
     Active911HUDMap.prototype = {
@@ -38,6 +36,11 @@ var Active911HUDMap;
         clearRoute: function () {
             this.directionsRenderer.setDirections({routes: []});
             this.googleMap.setOptions(this.mapOptions);
+            this.updateHomeMarker({
+                lat: this.active911.getAgency().latitude,
+                lng: this.active911.getAgency().longitude,
+                visible: false
+            });
         },
 
         drawRoute: function (destination) {
@@ -102,6 +105,8 @@ var Active911HUDMap;
                 position: this.mapOptions.center,
                 map: this.googleMap
             });
+
+            this.active911.on('active-alert-timer-stop', this.clearRoute.bind(this));
         },
 
         updateHomeMarker: function (config) {

@@ -28,6 +28,7 @@ module.exports = function (active911Settings) {
     let Active911 = function () {
         oauth2 = require('simple-oauth2').create(credentials);
         this.activeAlert = null;
+        this.activeAlertTimer = null;
         this.devices = {};
     };
 

@@ -48,7 +48,7 @@ $('#active911\\:settings-save').on('click', (e) => {
 function clearActiveAlert() {
     "use strict";
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
-    $('#active911\\:active-alert-container').html();
+    $('#active911\\:active-alert-container').html(null);
 }
 
 function googleMapInitializeCallback() {
