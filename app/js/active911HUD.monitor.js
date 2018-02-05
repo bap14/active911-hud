@@ -126,7 +126,7 @@ function updateGoogleRoute(incident) {
     }
     else {
         let destination;
-        if (incident.latitude && incident.longitude) {
+        if (parseFloat(incident.latitude) && parseFloat(incident.longitude)) {
             destination = { lat: incident.latitude, lng: incident.longitude };
             active911Map.drawRoute(destination);
         }
@@ -134,11 +134,12 @@ function updateGoogleRoute(incident) {
             destination = incident.address + ' ' + incident.city + ' ' + incident.state;
 
             active911Map.geocodeAddress(destination).then((result) => {
-                active911Map.drawRoute(result.geometry.location);
+                console.log(result);
+                if (result.length > 0 && result[0].geometry && result[0].geometry.location) {
+                    active911Map.drawRoute(result[0].geometry.location);
+                }
             });
         }
-
-
     }
 }
 
@@ -156,6 +157,9 @@ ipcRenderer.on('alerts-updated', () => {
     });
 
     active911.setActiveAlert();
+
+    // Test for intersection routing:
+    // active911.activeAlert = {"id":"114859145","received":"2018-02-05T02:12:08.000Z","sent":"2018-02-05T02:12:12.000Z","priority":"2","description":"VEHICLE COLLISION","details":"00:02:30 new units: M149 E141 DTY14\n\nNARRATIVE: SAW SMALL CAR SLIDE OFF ROAD AND HIT TREES/SPUN OUT/ON BRADDOCK RI        GHT AT SKIDMORE/UNK INJ\nFIREBOXINFO: 14 01 HC04 12 HC13 10 FC17 03 MC13 13 HC03 FC15 FC25 08 FC16 BC46 09 MC17 FC33 FC09 06 FC23 MC09 BC56 FC11 FC24 05 MC35 BC18 02 04 BC03 HC05 BC31 HC08 FC02 FC13 BC02 BC19 FC50 SFM 99\nCALLER_NAME: cody parks","external_data":"","place":"","address":"BRADDOCK RD / SKIDMORE RD","unit":"","cross_street":"FLEMING RD                   SKIDMORE RD","city":"MT AIRY","state":"MD","latitude":"0.00000000","longitude":"0.00000000","source":"","units":"M149 E141","cad_code":"18002271","map_code":"1417","agency":{"id":"22844","uri":"https://access.active911.com/interface/open_api/api/agencies/22844"},"pagegroups":[{"title":"Fire: E141 E142 TT14 B145 FR14 CS14 U14","prefix":"TE"},{"title":"EMS: M149 FR14 I149 A149 U14 U14-1","prefix":"BH"}],"responses":[{"response":"watch","timestamp":"2018-02-05 02:12:11","device":{"id":"506098","uri":"https://access.active911.com/interface/open_api/api/devices/506098"}},{"response":"watch","timestamp":"2018-02-05 02:12:16","device":{"id":"419626","uri":"https://access.active911.com/interface/open_api/api/devices/419626"}},{"response":"watch","timestamp":"2018-02-05 02:12:21","device":{"id":"486462","uri":"https://access.active911.com/interface/open_api/api/devices/486462"}},{"response":"watch","timestamp":"2018-02-05 02:12:25","device":{"id":"520295","uri":"https://access.active911.com/interface/open_api/api/devices/520295"}},{"response":"watch","timestamp":"2018-02-05 02:12:34","device":{"id":"506109","uri":"https://access.active911.com/interface/open_api/api/devices/506109"}},{"response":"watch","timestamp":"2018-02-05 02:12:41","device":{"id":"412607","uri":"https://access.active911.com/interface/open_api/api/devices/412607"}},{"response":"watch","timestamp":"2018-02-05 02:12:54","device":{"id":"508602","uri":"https://access.active911.com/interface/open_api/api/devices/508602"}},{"response":"watch","timestamp":"2018-02-05 02:13:00","device":{"id":"157251","uri":"https://access.active911.com/interface/open_api/api/devices/157251"}},{"response":"watch","timestamp":"2018-02-05 02:13:09","device":{"id":"514670","uri":"https://access.active911.com/interface/open_api/api/devices/514670"}},{"response":"watch","timestamp":"2018-02-05 02:14:03","device":{"id":"508599","uri":"https://access.active911.com/interface/open_api/api/devices/508599"}},{"response":"watch","timestamp":"2018-02-05 02:15:04","device":{"id":"508605","uri":"https://access.active911.com/interface/open_api/api/devices/508605"}},{"response":"watch","timestamp":"2018-02-05 02:16:54","device":{"id":"419052","uri":"https://access.active911.com/interface/open_api/api/devices/419052"}},{"response":"watch","timestamp":"2018-02-05 02:53:02","device":{"id":"509639","uri":"https://access.active911.com/interface/open_api/api/devices/509639"}},{"response":"watch","timestamp":"2018-02-05 03:01:16","device":{"id":"419050","uri":"https://access.active911.com/interface/open_api/api/devices/419050"}}]};
 
     if (active911.activeAlert !== null) {
         $('#alert-' + active911.activeAlert.id).addClass('panel-primary');
