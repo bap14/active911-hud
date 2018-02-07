@@ -35,7 +35,7 @@
                 <p class="navbar-right">
                     <span id="current-time"></span>
                     <button class="btn btn-info" type="button" id="active911:open-settings">
-                        <script>document.write(octicons.gear.toSVG({ "height": 22 }))</script>
+                        <script>document.write(octicons.settings.toSVG({ "height": 22 }))</script>
                     </button>
                     <button class="btn btn-danger" type="button" id="active911:exit">
                         <script>document.write(octicons.x.toSVG({ "height": 22 }))</script>
@@ -61,6 +61,9 @@
                 <h3 class="navbar-brand">
                     <button class="btn btn-danger navbar-btn" id="active911:close-settings">
                         <script>document.write(octicons.x.toSVG({ "height": 22 }))</script>
+                    </button>
+                    <button class="btn btn-primary navbar-btn" id="active911:save-settings">
+                        <script>document.write(octicons.check.toSVG({ "height": 22 }))</script> Save
                     </button>
                     <span class="text-light">Settings</span>
                 </h3>
@@ -198,6 +201,15 @@
             </form>
         </div>
     </div>
+    <nav class="navbar navbar-expand navbar-dark fixed-bottom bg-dark text-light">
+        <div class="container-fluid navbar-text text-light">
+            <span>Alerts last updated: <span id="active911:last-updated"></span></span>
+            <span id="active911:connection-status">
+                <span class="text"></span>
+                <span id="connection-icon"></span>
+            </span>
+        </div>
+    </nav>
     <div id="active911:active-alert-template">
         <div role="alert">
             <div class="card">
@@ -210,6 +222,9 @@
                     <div class="row">
                         <ul class="col-lg-6 responses"></ul>
                     </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <span class="alert-time"></span>
                 </div>
             </div>
         </div>

@@ -69,7 +69,7 @@ body#active911-hud {
   }
 
   #active911\:wrapper {
-    height: 1018px;
+    height: 936px;
 
     .col-lg-6 {
       height: 100%;
@@ -95,11 +95,23 @@ body#active911-hud {
       position: relative;
       z-index: 10001;
 
-      .navbar-brand {
-        #active911\:close-settings {
-          cursor: pointer;
-          margin: 0 10px 0 0;
-          -webkit-app-region: no-drag;
+      .navbar-header {
+        width: 100%;
+
+        .navbar-brand {
+          width: 100%;
+
+          button.btn,
+          #active911\:close-settings {
+            float: right;
+            cursor: pointer;
+            margin: 0 10px 0 0;
+            -webkit-app-region: no-drag;
+          }
+
+          #active911\:close-settings {
+            margin-right: 0;
+          }
         }
       }
     }
