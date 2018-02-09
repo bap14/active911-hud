@@ -1,10 +1,6 @@
 "use strict";
 
-const ping = require('tcp-ping');
-
 let active911Map, active911SettingsModel;
-
-pingActive911();
 
 $('#active911\\:exit').on('click', (e) => {
     e.stopPropagation();
@@ -46,42 +42,6 @@ function clearActiveAlert() {
 
 function googleMapInitializeCallback() {
     active911Map.initialize();
-}
-
-function pingActive911() {
-    ping.ping({ address: 'access.active911.com', port: 443, attempts: 5, timeout: 600 }, (error, data) => {
-        let statusClass;
-        if (error === null) {
-            switch (true) {
-                case data.avg <= 50:
-                    statusClass = 'excellent';
-                    break;
-
-                case data.avg > 50 && data.avg <= 100:
-                    statusClass = 'good';
-                    break;
-
-                case data.avg > 100 && data.avg <= 200:
-                    statusClass = 'average';
-                    break;
-
-                case data.avg > 250 && data.avg <= 500:
-                    statusClass = 'poor';
-                    break;
-
-                default:
-                    statusClass = 'horrible';
-            }
-
-            $('#active911\\:connection-status .text').html('Connected');
-            $('#active911\\:connection-status #connection-icon').addClass('ping-' + statusClass);
-        } else {
-            $('#active911\\:connection-status .text').html('Disconnected');
-            $('#active911\\:connection-status #connection-icon').addClass('disconnected');
-        }
-
-        setTimeout(pingActive911, 10000);
-    });
 }
 
 function saveSettings(e) {

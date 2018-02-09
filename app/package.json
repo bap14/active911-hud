@@ -34,7 +34,6 @@
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "simple-oauth2": "^1.5.0",
-    "sprintf-js": "^1.1.1",
-    "tcp-ping": "^0.1.1"
+    "sprintf-js": "^1.1.1"
   }
 }
