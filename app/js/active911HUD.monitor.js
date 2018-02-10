@@ -37,7 +37,7 @@ $('#active911\\:save-settings').on('click', saveSettings);
 function clearActiveAlert() {
     "use strict";
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
-    $('#active911\\:active-alert-container').html(null);
+    $('#active911\\:active-alert-container').hide().html(null);
 }
 
 function googleMapInitializeCallback() {
@@ -91,6 +91,7 @@ function showActiveAlert() {
 
     $('#active911-hud > .navbar.sticky-top').addClass('bg-active-alert');
     $('#active911\\:active-alert-container').html(alert);
+    $('#active911\\:active-alert-container').show();
 }
 
 /**
@@ -102,8 +103,7 @@ function updateAlert(data) {
     let alert,
         existing = true,
         template = $('#active911\\:alert-list-template > [role="list"]').clone(),
-        address = '',
-        dateSent;
+        address = '';
 
     alert = $('#alert-' + data.id);
     if (alert.length === 0) {
@@ -112,24 +112,28 @@ function updateAlert(data) {
         alert.attr('id', 'alert-' + data.id);
     }
 
-    $('.location-name', alert).text('#' + data.cad_code + ' ' + data.address);
+    // $('.alert-number', alert).text('#' + data.cad_code + ' - ' + data.description);
+
+    $('.alert-title > .number', alert).text(data.cad_code);
+    $('.alert-title > .description', alert).text(data.description);
 
     if (data.place) address += data.place + "\n";
     address += data.address;
     if (data.unit) address += " " + data.unit;
     address += "\n" + data.city + ", " + data.state;
-    $('address', alert).text(address);
+    // $('.alert-address', alert).text(address);
 
-    $('.description', alert).text(data.description);
+    // $('.alert-description', alert).text(data.description);
+    $('.alert-description', alert).text(address);
 
-    $('.timestamp', alert).text(
+    $('.alert-date', alert).text(
         data.received.toLocaleDateString(
             "en-US",
-            {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'}
+            {month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'}
         )
     );
 
-    if (!existing) alert.appendTo('#active911\\:alerts');
+    if (!existing) alert.appendTo('#active911\\:alert-list');
 }
 
 function updateGoogleRoute(incident) {
@@ -168,9 +172,10 @@ function updateTimer() {
 }
 
 ipcRenderer.on('alerts-updated', () => {
+    console.log(new Date().toLocaleDateString('en-US', {hour: '2-digit', minute: '2-digit', second: '2-digit'}));
     $('#active911\\:last-updated').html(new Date().toLocaleDateString(
         "en-US",
-        {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'}
+        {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'}
     ));
 
     $(active911.alerts).each((i, alert) => {
@@ -201,13 +206,13 @@ ipcRenderer.on('agency-updated', () => {
 });
 
 $(document).ready(() => {
+    updateTimer();
+
     active911.on('active-alert-timer-start', showActiveAlert);
     active911.on('active-alert-timer-stop', clearActiveAlert);
 
     $('#active911\\:googleMaps\\:zoom-value > span').text(active911Settings.config.googleMaps.zoom);
     $('#active911\\:googleMaps\\:zoom').slider('setValue', active911Settings.config.googleMaps.zoom);
-
-    updateTimer();
 
     $('#active911\\:googleMaps\\:zoom').on('slide', function (slideEvt) {
         $('#active911\\:googleMaps\\:zoom-value > span').text(slideEvt.value);

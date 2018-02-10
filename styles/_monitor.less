@@ -172,11 +172,29 @@ body#active911-hud {
 
   #active911\:wrapper {
     #active911\:active-alert-container {
+      height: 100%;
+
       .card {
         margin-top: 15px;
 
         address {
           white-space: pre;
+        }
+      }
+    }
+
+    #active911\:alert-list {
+      [role="list"] {
+        .list-group-item {
+          .alert-title {
+            .number:before {
+              content: '#';
+            }
+
+            .description {
+              margin-left: 1.5em;
+            }
+          }
         }
       }
     }

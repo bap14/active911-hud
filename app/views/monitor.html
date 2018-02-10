@@ -48,9 +48,8 @@
         <div class="row" id="active911:wrapper">
             <div class="col-lg-6">
                 <div id="active911:active-alert-container"></div>
-                <ul id="active911:alert-list">
-
-                </ul>
+                <div id="active911:alert-list" class="list-group">
+                </div>
             </div>
             <div class="col-lg-6" id="active911:map"></div>
         </div>
@@ -226,7 +225,16 @@
         </div>
     </div>
     <div id="active911:alert-list-template">
-        <div role="list"></div>
+        <div role="list" class="mb-1">
+            <div class="list-group-item flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1 alert-title"><span class="number"></span><span class="description"></span></h5>
+                    <small class="alert-date"></small>
+                </div>
+                <p class="alert-description"></p>
+                <p class="text-muted alert-address"></p>
+            </div>
+        </div>
     </div>
     <div id="active911:settings-overlay"></div>
 
