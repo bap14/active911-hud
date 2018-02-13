@@ -54,6 +54,9 @@ module.exports = function (active911Settings) {
 
         return this.callApi('devices/' + deviceId)
             .then((json) => {
+                json.device.latitude = parseFloat(json.device.latitude);
+                json.device.longitude = parseFloat(json.device.longitude);
+
                 self.devices[json.device.id] = json.device;
             });
     };
@@ -179,8 +182,10 @@ module.exports = function (active911Settings) {
             let alert = this.alerts[0];
 
             if (
+                true /*
                 (!this.activeAlert || alert.id !== this.activeAlert.id)
                 && (new Date().getTime()) - active911Settings.get('active911.alerts.activeAlertAge') < alert.received.getTime()
+                */
             ) {
                 this.activeAlert = alert;
             }
@@ -194,17 +199,17 @@ module.exports = function (active911Settings) {
         this.cacheDevices()
             .then(() => {
                 ipcMain.emit('active911-agency-updated');
+
+                this.updateAlerts();
+
+                // Get alerts every 30-seconds
+                this.alertUpdater = setInterval((() => { this.updateAlerts(); }).bind(this), 30 * 1000);
+                // Cache device data every 2 minutes
+                this.deviceUpdater = setInterval((() => { this.cacheDevices(); }).bind(this), 2 * 60 * 1000);
             })
             .catch((err) => {
                 console.error(err.message, err);
             });
-
-        this.updateAlerts();
-
-        // Get alerts every 30-seconds
-        this.alertUpdater = setInterval((() => { this.updateAlerts(); }).bind(this), 30 * 1000);
-        // Cache device data every 5 minutes
-        this.deviceUpdater = setInterval((() => { this.cacheDevices(); }).bind(this), 5 * 60 * 1000);
     };
 
     Active911.prototype.startActiveAlertTimer = function () {

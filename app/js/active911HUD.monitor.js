@@ -1,5 +1,8 @@
 "use strict";
 
+const app = require('electron');
+const path = require('path');
+
 let active911Map, active911SettingsModel;
 
 $('#active911\\:exit').on('click', (e) => {
@@ -37,12 +40,19 @@ $('#active911\\:save-settings').on('click', saveSettings);
 function clearActiveAlert() {
     "use strict";
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
-    $('#active911\\:active-alert-container').hide();
-    $('#active911\\:active-alert-container').html(null);
+    $('#active911\\:active-alert-container').hide().html(null);
+}
+
+function clearPersonnelMarker(device) {
+    if (typeof device.mapMarker === "google.maps.Marker") {
+        device.mapMarker.setMap(null);
+    }
 }
 
 function clearPersonnelMarkers() {
-    // TODO: Clear all personnel markers
+    for (i=0; i < active911.devices.length; i++) {
+        clearPersonnelMarker(active911.devices[i]);
+    }
 }
 
 function googleMapInitializeCallback() {
@@ -94,11 +104,37 @@ function showActiveAlert() {
         )
     );
 
-    // TODO: Add personnel information
+    showPersonnelMarkers(active911.activeAlert);
 
     $('#active911-hud > .navbar.sticky-top').addClass('bg-active-alert');
     $('#active911\\:active-alert-container').html(alert);
     $('#active911\\:active-alert-container').show();
+}
+
+function showPersonnelMarkers(incident) {
+    let visibleDevices = [];
+    for (let n=0; n < active911.devices.length; n++) {
+        let device = active911.getDevice(active911.devices[i].device.id);
+        if (typeof device.mapMarker === "google.maps.Marker") {
+            visibleDevices.push(device.id);
+        }
+    }
+
+    for (let i=0; i < incident.responses.length; i++) {
+        let device = active911.getDevice(incident.responses[i].device.id);
+        if (typeof device !== "undefined" && typeof device.id !== "undefined") {
+            let existingIndex = visibleDevices.indexOf(device.id);
+            if (existingIndex >= 0) {
+                visibleDevices = visibleDevices.slice(existingIndex);
+            }
+            updatePersonnelMarker(device, incident.responses[i]);
+        }
+    }
+
+    for (let i=0; i < visibleDevices.length; i++) {
+        clearPersonnelMarker(active911.getDevice(visibleDevices[i]));
+    }
+
 }
 
 /**
@@ -148,33 +184,54 @@ function updateGoogleRoute(incident) {
         active911Map.updateHomeMarker({
             lat: active911.getAgency().latitude,
             lng: active911.getAgency().longitude,
-            visible: false
+            visible: true
         });
+
+        clearPersonnelMarkers();
     }
     else {
         let destination;
         if (parseFloat(incident.latitude) && parseFloat(incident.longitude)) {
-            destination = { lat: incident.latitude, lng: incident.longitude };
+            destination = { lat: parseFloat(incident.latitude), lng: parseFloat(incident.longitude) };
             active911Map.drawRoute(destination);
         }
         else {
             destination = incident.address + ' ' + incident.city + ' ' + incident.state;
 
             active911Map.geocodeAddress(destination).then((result) => {
-                console.log(result);
                 if (result.length > 0 && result[0].geometry && result[0].geometry.location) {
                     active911Map.drawRoute(result[0].geometry.location);
                 }
             });
         }
+        showPersonnelMarkers(incident);
     }
 }
 
-function updatePersonnelMarkers(incident) {
-    // TODO: Place personnel markers
-
-    // Marker Image: /images/marker-personnel.png
-    // Marker Image Anchor Point x: 72, y: 228
+function updatePersonnelMarker(device, response) {
+    active911.cacheDevice(device.id).then(() => {
+        if (typeof device.mapMarker === "google.maps.Marker") {
+            device.mapMarker.setMap(active911Map.googleMap);
+            device.mapMarker.setOptions({
+                position: {lat: device.latitude, lng: device.longitude }
+            });
+        } else {
+            device.mapMarker = new google.maps.Marker({
+                map: active911Map.googleMap,
+                icon: { url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-personnel.png" },
+                position: new google.maps.LatLng({ lat: device.latitude, lng: device.longitude })
+            });
+            if (typeof device.mapMarkerInfo === "undefined" || device.mapMarkerInfo === null) {
+                device.mapMarkerInfo = new google.maps.InfoWindow({
+                    disableAutoPan: true,
+                    content: device.name
+                });
+            }
+        }
+        device.mapMarkerInfo.open(active911Map.googleMap, device.mapMarker);
+    }).catch((err) => {
+        console.log(err);
+    });
 }
 
 function updateTimer() {
