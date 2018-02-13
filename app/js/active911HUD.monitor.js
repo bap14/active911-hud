@@ -38,9 +38,9 @@ $('#active911\\:settings-save').on('click', saveSettings);
 $('#active911\\:save-settings').on('click', saveSettings);
 
 function clearActiveAlert() {
-    "use strict";
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
-    $('#active911\\:active-alert-container').hide().html(null);
+    $('#active911\\:active-alert-container').hide();
+    $('#active911\\:active-alert-container').html('');
 }
 
 function clearPersonnelMarker(device) {
@@ -230,7 +230,7 @@ function updatePersonnelMarker(device, response) {
         }
         device.mapMarkerInfo.open(active911Map.googleMap, device.mapMarker);
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
     });
 }
 
