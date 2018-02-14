@@ -123,7 +123,10 @@ function showPersonnelMarkers(incident) {
     for (let i=0; i < incident.responses.length; i++) {
         let device = active911.getDevice(incident.responses[i].device.id);
         if (typeof device !== "undefined" && typeof device.id !== "undefined") {
-            if (active911SettingsModel.active911.responseVocabulary.indexOf(incident.responses[i].response) !== -1) {
+            if (
+                (incident.responses[i].response === "watch" && active911SettingsModel.active911.showWatchers) ||
+                active911SettingsModel.active911.responseVocabulary.indexOf(incident.responses[i].response) !== -1
+            ) {
                 let existingIndex = visibleDevices.indexOf(device.id);
                 if (existingIndex >= 0) {
                     visibleDevices = visibleDevices.slice(existingIndex);
