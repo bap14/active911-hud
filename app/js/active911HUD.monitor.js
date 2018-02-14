@@ -3,7 +3,7 @@
 const app = require('electron');
 const path = require('path');
 
-let active911Map, active911SettingsModel;
+let active911Map, active911ResponseVocabularyModel, active911SettingsModel;
 
 $('#active911\\:exit').on('click', (e) => {
     e.stopPropagation();
@@ -123,11 +123,13 @@ function showPersonnelMarkers(incident) {
     for (let i=0; i < incident.responses.length; i++) {
         let device = active911.getDevice(incident.responses[i].device.id);
         if (typeof device !== "undefined" && typeof device.id !== "undefined") {
-            let existingIndex = visibleDevices.indexOf(device.id);
-            if (existingIndex >= 0) {
-                visibleDevices = visibleDevices.slice(existingIndex);
+            if (active911SettingsModel.active911.responseVocabulary.indexOf(incident.responses[i].response) !== -1) {
+                let existingIndex = visibleDevices.indexOf(device.id);
+                if (existingIndex >= 0) {
+                    visibleDevices = visibleDevices.slice(existingIndex);
+                }
+                updatePersonnelMarker(device, incident.responses[i]);
             }
-            updatePersonnelMarker(device, incident.responses[i]);
         }
     }
 
@@ -293,11 +295,23 @@ $(document).ready(() => {
     });
 
     active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
+    active911SettingsModel.addVocabulary = function () {
+        let response = this.newVocabulary();
+        if (response) {
+            active911SettingsModel.active911.responseVocabulary.push(response);
+        }
+        active911SettingsModel.newVocabulary("");
+    };
+    active911SettingsModel.newVocabulary = ko.observable();
+    active911SettingsModel.removeVocabulary = function (vocabulary) {
+        active911SettingsModel.active911.responseVocabulary.remove(vocabulary);
+    };
     ko.applyBindings(active911SettingsModel);
 
     $('#active911\\:settings').dependentFields();
 
     if (active911Settings.getGoogleMapsApiKey()) {
+
         active911Map = new Active911HUDMap(
             active911,
             $('#active911\\:map'),

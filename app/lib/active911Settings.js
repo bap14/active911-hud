@@ -40,7 +40,8 @@ module.exports = function () {
                     activeAlertAge: 15,
                     clearAfter: 30,
                     timeFrame: 30
-                }
+                },
+                responseVocabulary: []
             },
             googleMapsApiKey: '',
             googleMaps: {
