@@ -41,6 +41,7 @@ module.exports = function () {
                     clearAfter: 30,
                     timeFrame: 30
                 },
+                showWatchers: false,
                 responseVocabulary: []
             },
             googleMapsApiKey: '',

@@ -124,7 +124,7 @@ function showPersonnelMarkers(incident) {
         let device = active911.getDevice(incident.responses[i].device.id);
         if (typeof device !== "undefined" && typeof device.id !== "undefined") {
             if (
-                (incident.responses[i].response === "watch" && active911SettingsModel.active911.showWatchers) ||
+                (incident.responses[i].response === "watch" && active911SettingsModel.active911.showWatchers === true) ||
                 active911SettingsModel.active911.responseVocabulary.indexOf(incident.responses[i].response) !== -1
             ) {
                 let existingIndex = visibleDevices.indexOf(device.id);
@@ -309,6 +309,8 @@ $(document).ready(() => {
     active911SettingsModel.removeVocabulary = function (vocabulary) {
         active911SettingsModel.active911.responseVocabulary.remove(vocabulary);
     };
+    console.log(active911SettingsModel.active911);
+    active911SettingsModel.active911.showWatchers = ko.observable(active911SettingsModel.active911.showWatchers);
     ko.applyBindings(active911SettingsModel);
 
     $('#active911\\:settings').dependentFields();

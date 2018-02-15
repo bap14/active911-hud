@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
     <link rel="stylesheet" href="styles/lib/bootstrap-slider.min.css" />
+    <link rel="stylesheet" href="styles/lib/bootstrap-toggle.min.css" />
     <link rel="stylesheet" href="styles/lib/octicons.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
@@ -121,6 +122,15 @@
                     -->
                     <div class="form-group">
                         <label for="active911:response-vocabulary">Response Vocabulary</label>
+                        <ul data-bind="foreach: active911.responseVocabulary,
+                                       visible: active911.responseVocabulary().length > 0"
+                            id="active911:response-vocabulary-list"
+                            class="mt-2 mb-2">
+                            <li class="border border-secondary">
+                                <a href="#" class="badge badge-danger badge-pill" data-bind="click: $parent.removeVocabulary">X</a>
+                                <span data-bind="text: $data"></span>
+                            </li>
+                        </ul>
                         <form data-bind="submit: addVocabulary">
                             <div class="input-group">
                                 <input id="active911:response-vocabulary"
@@ -133,13 +143,16 @@
                                 </div>
                             </div>
                         </form>
-                        <ul data-bind="foreach: active911.responseVocabulary,
-                                       visible: active911.responseVocabulary().length > 0">
-                            <li>
-                                <span data-bind="text: $data"></span>
-                                <a href="#" data-bind="click: $parent.removeVocabulary">x</a>
-                            </li>
-                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox"
+                               id="active911:show-watchers"
+                               value="1"
+                               data-toggle="toggle"
+                               data-bind="checked: active911.showWatchers"
+                               data-on="Yes"
+                               data-off="No" />
+                        <label for="active911:show-watchers">Include "watch" Responses</label>
                     </div>
                 </div>
             </div>
@@ -261,6 +274,7 @@
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
     <script src="js/lib/bootstrap-slider.min.js"></script>
+    <script src="js/lib/bootstrap-toggle.min.js"></script>
     <script src="js/lib/knockout.js"></script>
     <script src="js/knockout.mapping.js"></script>
     <script src="js/dependent-fields.jquery.js"></script>
