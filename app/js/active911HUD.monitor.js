@@ -298,6 +298,7 @@ $(document).ready(() => {
         ipcRenderer.send('launch-google');
     });
 
+    /** Support bootstrap-toggle checkbox elements **/
     ko.bindingHandlers.toggled = {
         init: (elem, valueAccessor) => {
             $(elem).prop('checked', ko.unwrap(valueAccessor())).change();
@@ -324,12 +325,13 @@ $(document).ready(() => {
     ko.applyBindings(active911SettingsModel);
 
     $('#active911\\:settings').dependentFields();
+
+    /** Add Bootstrap v4 support to bootstrap-toggle library **/
     $('.btn-default').each((i, elem) => {
         $(elem).addClass('btn-light');
     });
 
     if (active911Settings.getGoogleMapsApiKey()) {
-
         active911Map = new Active911HUDMap(
             active911,
             $('#active911\\:map'),
