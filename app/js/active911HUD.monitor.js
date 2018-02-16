@@ -65,6 +65,7 @@ function saveSettings(e) {
     let settings = ko.mapping.toJS(active911SettingsModel);
     settings.googleMaps.zoom = parseInt(settings.googleMaps.zoom);
     settings.active911.clearOldAlerts = Boolean(settings.active911.clearOldAlerts).valueOf();
+    settings.active911.showWatchers = active911SettingsModel.toggleIncludeWatchers();
     active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey)
         .set('googleMaps', settings.googleMaps)
         .set('active911', settings.active911);
@@ -297,6 +298,16 @@ $(document).ready(() => {
         ipcRenderer.send('launch-google');
     });
 
+    ko.bindingHandlers.toggled = {
+        init: (elem, valueAccessor) => {
+            $(elem).prop('checked', ko.unwrap(valueAccessor())).change();
+            $(elem).change(() => {
+                let value = valueAccessor();
+                value($(elem).prop('checked'));
+            });
+        }
+    };
+
     active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
     active911SettingsModel.addVocabulary = function () {
         let response = this.newVocabulary();
@@ -309,11 +320,13 @@ $(document).ready(() => {
     active911SettingsModel.removeVocabulary = function (vocabulary) {
         active911SettingsModel.active911.responseVocabulary.remove(vocabulary);
     };
-    console.log(active911SettingsModel.active911);
-    active911SettingsModel.active911.showWatchers = ko.observable(active911SettingsModel.active911.showWatchers);
+    active911SettingsModel.toggleIncludeWatchers = ko.observable(active911Settings.config.active911.showWatchers);
     ko.applyBindings(active911SettingsModel);
 
     $('#active911\\:settings').dependentFields();
+    $('.btn-default').each((i, elem) => {
+        $(elem).addClass('btn-light');
+    });
 
     if (active911Settings.getGoogleMapsApiKey()) {
 
