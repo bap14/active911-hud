@@ -122,11 +122,21 @@ function showPersonnelMarkers(incident) {
     }
 
     for (let i=0; i < incident.responses.length; i++) {
-        let device = active911.getDevice(incident.responses[i].device.id);
+        let device = active911.getDevice(incident.responses[i].device.id),
+            visibleResponseType;
         if (typeof device !== "undefined" && typeof device.id !== "undefined") {
+            visibleResponseType = ko.unwrap(
+                active911SettingsModel.active911.responseVocabulary.vocabularyExists(
+                    incident.responses[i].response,
+                    'term'
+                )
+            );
             if (
-                (incident.responses[i].response === "watch" && active911SettingsModel.active911.showWatchers === true) ||
-                active911SettingsModel.active911.responseVocabulary.indexOf(incident.responses[i].response) !== -1
+                (
+                    incident.responses[i].response.toLowerCase() === "watch" &&
+                    ko.unwrap(active911SettingsModel.active911.showWatchers) === true
+                )
+                || visibleResponseType === true
             ) {
                 let existingIndex = visibleDevices.indexOf(device.id);
                 if (existingIndex >= 0) {
@@ -248,6 +258,12 @@ function updateTimer() {
     setTimeout(updateTimer, 250);
 }
 
+function VocabularyWord(term, label) {
+    var self = this;
+    self.term = ko.observable(term);
+    self.label = ko.observable(label);
+}
+
 ipcRenderer.on('alerts-updated', () => {
     $('#active911\\:last-updated').html(new Date().toLocaleDateString(
         "en-US",
@@ -298,6 +314,18 @@ $(document).ready(() => {
         ipcRenderer.send('launch-google');
     });
 
+    ko.observableArray.fn.vocabularyExists = function (value, objectKey) {
+        return ko.pureComputed(() => {
+            let allItems = this(), i=0;
+            for (i; i < allItems.length; i++) {
+                if (ko.unwrap(allItems[i][objectKey]).toLowerCase() === value.toLowerCase()) {
+                    return true;
+                }
+            }
+            return false;
+        }, this);
+    };
+
     /** Support bootstrap-toggle checkbox elements **/
     ko.bindingHandlers.toggled = {
         init: (elem, valueAccessor) => {
@@ -310,16 +338,37 @@ $(document).ready(() => {
     };
 
     active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
+    active911SettingsModel.active911.responseVocabulary = ko.observableArray();
+
+    for (let i=0; i<active911Settings.config.active911.responseVocabulary.length; i++) {
+        active911SettingsModel.active911.responseVocabulary.push(
+            new VocabularyWord(
+                active911Settings.config.active911.responseVocabulary[i].term,
+                active911Settings.config.active911.responseVocabulary[i].label
+            )
+        );
+    }
+
     active911SettingsModel.addVocabulary = function () {
-        let response = this.newVocabulary();
-        if (response) {
-            active911SettingsModel.active911.responseVocabulary.push(response);
-        }
-        active911SettingsModel.newVocabulary("");
+        let self = this;
+        self.active911.responseVocabulary.push(new VocabularyWord("", ""));
     };
-    active911SettingsModel.newVocabulary = ko.observable();
     active911SettingsModel.removeVocabulary = function (vocabulary) {
         active911SettingsModel.active911.responseVocabulary.remove(vocabulary);
+    };
+    active911SettingsModel.addVocabularyIDs = function (domElements, data) {
+        for (let i=0; i<domElements.length; i++) {
+            if ($(domElements[i]) && $('.responseCode > label', $(domElements[i]))) {
+                let elem = $(domElements[i]),
+                    increment = active911SettingsModel.active911.responseVocabulary.length + 1;
+
+                $('.responseCode > label', elem).attr('id', 'response-code-' + increment);
+                $('.responseCode > input', elem).attr('id', 'response-code-' + increment);
+
+                $('.responseLabel > label', elem).attr('id', 'response-label-' + increment);
+                $('.responseLabel > input', elem).attr('id', 'response-label-' + increment);
+            }
+        }
     };
     active911SettingsModel.toggleIncludeWatchers = ko.observable(active911Settings.config.active911.showWatchers);
     ko.applyBindings(active911SettingsModel);
