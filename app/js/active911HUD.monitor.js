@@ -171,8 +171,6 @@ function updateAlert(data) {
         alert.attr('id', 'alert-' + data.id);
     }
 
-    // $('.alert-number', alert).text('#' + data.cad_code + ' - ' + data.description);
-
     $('.alert-title > .number', alert).text(data.cad_code);
     $('.alert-title > .description', alert).text(data.description);
 
@@ -180,9 +178,7 @@ function updateAlert(data) {
     address += data.address;
     if (data.unit) address += " " + data.unit;
     address += "\n" + data.city + ", " + data.state;
-    // $('.alert-address', alert).text(address);
 
-    // $('.alert-description', alert).text(data.description);
     $('.alert-description', alert).text(address);
 
     $('.alert-date', alert).text(
@@ -258,11 +254,60 @@ function updateTimer() {
     setTimeout(updateTimer, 250);
 }
 
-function VocabularyWord(term, label) {
-    var self = this;
+function VocabularyWord(term, label, order, id) {
+    let self = this, itemOrder;
+
+    if (typeof id === "undefined" || id === null) {
+        self.id = self.generateRandomId();
+    } else {
+        self.id = id;
+    }
+
+    if (typeof order === "undefined" || order === -1) {
+        itemOrder = self.getNewOrder();
+    } else {
+        itemOrder = parseInt(order);
+    }
+
     self.term = ko.observable(term);
     self.label = ko.observable(label);
+
+    self.order = ko.observable(itemOrder);
 }
+
+VocabularyWord.prototype.generateRandomId = function () {
+    let id = "";
+
+    let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    for (let i=0; i<4; i++) {
+        for (let n=0; n<4; n++) {
+            id += characters.charAt(Math.random() * (characters.length - 1));
+        }
+        id += '-';
+    }
+    id = id.substr(0, id.length - 1);
+
+    return id;
+};
+
+VocabularyWord.prototype.getNewOrder = function () {
+    let i=0, maxOrder = -1, currentVocabulary;
+
+    for (i; i<active911SettingsModel.active911.responseVocabulary().length; i++) {
+        currentVocabulary = active911SettingsModel.active911.responseVocabulary()[i];
+        if (typeof currentVocabulary.order !== "undefined" && maxOrder === -1) {
+            maxOrder = ko.unwrap(currentVocabulary.order);
+            continue;
+        }
+
+        if (typeof currentVocabulary.order !== "undefined" && currentVocabulary.order > maxOrder) {
+            maxOrder = ko.unwrap(currentVocabulary.order);
+        }
+    }
+
+    return maxOrder + 1;
+};
 
 ipcRenderer.on('alerts-updated', () => {
     $('#active911\\:last-updated').html(new Date().toLocaleDateString(
@@ -326,6 +371,17 @@ $(document).ready(() => {
         }, this);
     };
 
+    ko.observableArray.fn.getById = function (value) {
+        let allItems = this(), i=0;
+        for (i; i < allItems.length; i++) {
+            if (ko.unwrap(allItems[i].id) === value) {
+                return allItems[i];
+            }
+        }
+
+        return false;
+    };
+
     /** Support bootstrap-toggle checkbox elements **/
     ko.bindingHandlers.toggled = {
         init: (elem, valueAccessor) => {
@@ -338,13 +394,21 @@ $(document).ready(() => {
     };
 
     active911SettingsModel = ko.mapping.fromJS(active911Settings.config);
+    active911SettingsModel.afterResponseVocabularyRender = function (element, vocabWord) {
+        $(element).filter('li').attr('id', vocabWord.id);
+    };
     active911SettingsModel.active911.responseVocabulary = ko.observableArray();
 
     for (let i=0; i<active911Settings.config.active911.responseVocabulary.length; i++) {
         active911SettingsModel.active911.responseVocabulary.push(
             new VocabularyWord(
                 active911Settings.config.active911.responseVocabulary[i].term,
-                active911Settings.config.active911.responseVocabulary[i].label
+                active911Settings.config.active911.responseVocabulary[i].label,
+                typeof active911Settings.config.active911.responseVocabulary[i].order !== "undefined"
+                    ? parseInt(active911Settings.config.active911.responseVocabulary[i].order) : -1,
+                typeof active911Settings.config.active911.responseVocabulary[i].id !== "undefined"
+                    ? parseInt(active911Settings.config.active911.responseVocabulary[i].id) : null,
+
             )
         );
     }
@@ -370,6 +434,11 @@ $(document).ready(() => {
             }
         }
     };
+    active911SettingsModel.reorderVocabularyTerms = function (evt) {
+        $('li', evt.srcElement).each((idx, elem) => {
+            active911SettingsModel.active911.responseVocabulary.getById(elem.id).order(idx);
+        });
+    };
     active911SettingsModel.toggleIncludeWatchers = ko.observable(active911Settings.config.active911.showWatchers);
     ko.applyBindings(active911SettingsModel);
 
@@ -392,4 +461,12 @@ $(document).ready(() => {
     }
 
     active911.startup();
+    Sortable.create(
+        $('#active911\\:response-vocabulary-list')[0],
+        {
+            handle: '.handle',
+            draggable: '.draggable',
+            onEnd: active911SettingsModel.reorderVocabularyTerms
+        }
+    );
 });

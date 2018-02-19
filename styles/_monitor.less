@@ -79,21 +79,27 @@ body#active911-hud {
   #active911\:settings {
     box-shadow: 4px 0 10px 8px #939393;
 
-    bottom: 0;
+    left: 5%;
     position: fixed;
-    right: -650px;
-    top: 0;
+    top: 5%;
     overflow-x: hidden;
+    opacity: 0;
+    display: none;
 
-    width: 640px;
+    padding-top: 3%;
+
+    height: 87%;
+    width: 90%;
 
     z-index: 10000;
     transition: 0.5s;
 
     .navbar {
       border-radius: 0;
-      position: relative;
+      position: fixed;
       z-index: 10001;
+      top: 5%;
+      width: 90%;
 
       .navbar-header {
         width: 100%;
@@ -114,6 +120,14 @@ body#active911-hud {
           }
         }
       }
+    }
+
+    .container-scroll {
+      height: 100%;
+      width: 100%;
+
+      overflow: hidden;
+      overflow-y: scroll;
     }
 
     .form-group {
@@ -155,16 +169,43 @@ body#active911-hud {
 
       #active911\:response-vocabulary-list {
         width: 100%;
+        padding: 0;
 
         li {
           padding: 8px;
+          display: flex;
+
+          .handle {
+            cursor: move;
+          }
+
+          .responseCode {
+            input {
+              width: 7em;
+            }
+          }
+
+          .responseLabel {
+            input {
+              width: 12em;
+            }
+          }
+        }
+
+        .sortableChosen {
+          opacity: 0.25;
+        }
+
+        .sortableGhost {
+          opacity: 0.8;
         }
       }
     }
   }
 
   #active911\:settings.open {
-    right: 0;
+    opacity: 1;
+    display: block;
   }
 
   #active911\:settings-overlay {
