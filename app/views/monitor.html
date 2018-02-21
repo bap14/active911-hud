@@ -144,23 +144,25 @@
                                             class="btn btn-secondary"
                                             data-bind="click: addVocabulary">Add Vocabulary</button>
                                 </p>
-                                <ul data-bind="foreach: { data: active911.responseVocabulary,
-                                                          afterRender: afterResponseVocabularyRender },
+                                <ul data-bind="sortable: {
+                                                  foreach: { data: active911.responseVocabulary, afterRender: afterResponseVocabularyRender },
+                                                  options: { animation: 200, handle: '.handle', draggable: '.draggable', onSort: active911SettingsModel.reorderVocabularyTerms }
+                                               },
                                                visible: active911.responseVocabulary().length > 0"
                                     id="active911:response-vocabulary-list"
                                     class="mt-2 mb-2 list-group-flush">
                                     <li class="list-group-item form-row mb-1 draggable">
-                                        <div class="col-sm-1">
+                                        <div class="col-sm-2">
                                             <span class="handle">::</span>
+                                            <span data-bind="text: order"></span>
                                         </div>
-                                        <div class="col-sm-3 responseCode">
+                                        <div class="col-sm-2 responseCode">
                                             <input type="text" class="form-control" maxlength="6" placeholder="Code"
                                                    data-bind="value: term" />
                                         </div>
                                         <div class="col-sm-7 responseLabel">
                                             <input type="text" class="form-control" placeholder="Label"
                                                    data-bind="value: label" />
-                                            <input type="text" data-bind="value: order" />
                                         </div>
                                         <div class="col-sm-1">
                                             <button class="btn btn-danger removeRow"
@@ -295,6 +297,7 @@
     <script src="js/lib/bootstrap-toggle.min.js"></script>
     <script src="js/lib/knockout.js"></script>
     <script src="js/knockout.mapping.js"></script>
+    <script src="js/lib/knockout-sortable.js"></script>
     <script src="js/dependent-fields.jquery.js"></script>
     <script src="js/active911HUD.map.js"></script>
     <script src="js/active911HUD.monitor.js"></script>

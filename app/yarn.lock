@@ -472,6 +472,10 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
+knockout-sortablejs@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/knockout-sortablejs/-/knockout-sortablejs-0.1.0.tgz#54db48371bdbe898766d6ecb07ad12979acfe337"
+
 knockout@^3.4.2:
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/knockout/-/knockout-3.4.2.tgz#e87958de77ad1e936f7ce645bab8b5d7c456d937"
