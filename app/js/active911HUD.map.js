@@ -72,8 +72,6 @@ var Active911HUDMap;
             directions.route(directionReq, function (result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     self.directionsRenderer.setDirections(result);
-                    self.active911.stopActiveAlertTimer();
-                    self.active911.startActiveAlertTimer();
                 }
                 else {
                     console.error(status);

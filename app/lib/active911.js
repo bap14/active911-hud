@@ -182,12 +182,16 @@ module.exports = function (active911Settings) {
             let alert = this.alerts[0];
 
             if (
-                true /*
                 (!this.activeAlert || alert.id !== this.activeAlert.id)
+                /*
                 && (new Date().getTime()) - active911Settings.get('active911.alerts.activeAlertAge') < alert.received.getTime()
                 */
             ) {
                 this.activeAlert = alert;
+                console.log('Emitting notice for new active alert');
+                this.emit('new-alert');
+                this.stopActiveAlertTimer();
+                this.startActiveAlertTimer();
             }
         }
         else {
@@ -256,8 +260,11 @@ module.exports = function (active911Settings) {
                             if (a.received.getTime() === b.received.getTime()) return 0;
                             return (a.received.getTime() > b.received.getTime()) ? -1 : 1;
                         });
+                        that.setActiveAlert();
+                        that.emit('alerts-updated');
                         ipcMain.emit('active911-alerts-updated');
-                    });
+                    })
+                    .catch((e) => { console.error(e); });
             })
             .catch((err) => {
                 console.error(err.message);
