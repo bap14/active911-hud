@@ -53,7 +53,6 @@ function createHUDWindow() {
     });
     hudWindow.on('closed', () => hudWindow = null);
 
-    // TODO: Start timer, every 60 minutes check if OAuth token needs refresh
     checkOAuthToken();
 }
 

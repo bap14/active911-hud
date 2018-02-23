@@ -79,14 +79,19 @@
                             <div class="form-group">
                                 <label for="active911:token">Access Token</label>
                                 <input id="active911:token" class="form-control-plaintext"
-                                   data-bind="text: active911auth.token.access_token, value: active911auth.token.access_token" readonly />
-                                <p class="form-text text-muted">This token will automatically refresh before it expires.</p>
+                                       data-bind="text: active911auth.token.access_token,
+                                                  value: active911auth.token.access_token"
+                                       readonly />
+                                <p class="form-text text-muted">
+                                    This token will automatically refresh before it expires.
+                                </p>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="active911:alerts-time-frame">Alerts Time Frame</label>
                                 <div class="input-group">
                                     <input id="active911:alerts-time-frame" class="form-control"
-                                           data-bind="text: active911.alerts.timeFrame, value: active911.alerts.timeFrame" />
+                                           data-bind="text: active911.alerts.timeFrame,
+                                                      value: active911.alerts.timeFrame" />
                                     <div class="input-group-append">
                                         <span class="input-group-text">minutes</span>
                                     </div>
@@ -99,7 +104,8 @@
                                 <label for="active911:active-alert-age">Active Alert Age</label>
                                 <div class="input-group">
                                     <input id="active911:active-alert-age" class="form-control"
-                                           data-bind="text: active911.alerts.activeAlertAge, value: active911.alerts.activeAlertAge" />
+                                           data-bind="text: active911.alerts.activeAlertAge,
+                                                      value: active911.alerts.activeAlertAge" />
                                     <div class="input-group-append">
                                         <span class="input-group-text">minutes</span>
                                     </div>
@@ -110,7 +116,8 @@
                                 <label for="active911:clear-alerts-after">Clear Old Alerts</label>
                                 <div class="input-group">
                                     <input id="active911:clear-alerts-after" class="form-control"
-                                           data-bind="text: active911.alerts.clearAfter, value: active911.alerts.clearAfter" />
+                                           data-bind="text: active911.alerts.clearAfter,
+                                                      value: active911.alerts.clearAfter" />
                                     <div class="input-group-append">
                                         <span class="input-group-text">minutes</span>
                                     </div>
@@ -200,7 +207,8 @@
                                     <input class="form-control"
                                            id="active911:googleMaps:geocode"
                                            placeholder="1600 Pennsylvania Ave, Washington D.C. 20202"
-                                           data-bind="text: googleMaps.centerAddress, value: googleMaps.centerAddress" />
+                                           data-bind="text: googleMaps.centerAddress,
+                                                      value: googleMaps.centerAddress" />
                                     <span class="input-group-btn">
                                         <button class="btn btn-info" id="active911:google-maps:lookup-location">
                                             <script>document.write(octicons.search.toSVG({ "height": 22 }))</script>
@@ -238,7 +246,9 @@
                                        data-slider-value="7"
                                 />
                                 <span class="text-info">Closer</span>
-                                <p class="form-text text-muted">Use the slider above to change the zoom level of the map.</p>
+                                <p class="form-text text-muted">
+                                    Use the slider above to change the zoom level of the map.
+                                </p>
                             </div>
                             <div class="form-group">
                                 <label for="active911:googleMaps:mapTypeId" class="control-label">Map Type</label>
