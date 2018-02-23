@@ -15,10 +15,10 @@
         const ipcRenderer = require('electron').ipcRenderer;
         const octicons = require('octicons');
         const {sprintf} = require('sprintf-js');
+        window.$ = window.jQuery = require("jquery");
         let active911Settings = remote.getGlobal('active911Settings'),
             active911 = remote.getGlobal('active911');
-        window.$ = window.jQuery = require("jquery");
-        window.Sortable = require('sortablejs');
+
     </script>
 </head>
 <body id="active911-hud">
@@ -145,8 +145,10 @@
                                             data-bind="click: addVocabulary">Add Vocabulary</button>
                                 </p>
                                 <ul data-bind="sortable: {
-                                                  foreach: { data: active911.responseVocabulary, afterRender: afterResponseVocabularyRender },
-                                                  options: { animation: 200, handle: '.handle', draggable: '.draggable', onSort: active911SettingsModel.reorderVocabularyTerms }
+                                                    data: active911.responseVocabulary,
+                                                    afterMove: reorderVocabularyTerms,
+                                                    afterRender: afterResponseVocabularyRender,
+                                                    options: { handle: '.handle' }
                                                },
                                                visible: active911.responseVocabulary().length > 0"
                                     id="active911:response-vocabulary-list"
@@ -291,13 +293,14 @@
     </div>
     <div id="active911:settings-overlay"></div>
 
+    <script src="js/lib/jquery-ui.min.js"></script>
     <script src="js/lib/popper.min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
     <script src="js/lib/bootstrap-slider.min.js"></script>
     <script src="js/lib/bootstrap-toggle.min.js"></script>
     <script src="js/lib/knockout.js"></script>
     <script src="js/knockout.mapping.js"></script>
-    <script src="js/lib/knockout-sortable.js"></script>
+    <script src="js/lib/knockout-sortable.min.js"></script>
     <script src="js/dependent-fields.jquery.js"></script>
     <script src="js/active911HUD.map.js"></script>
     <script src="js/active911HUD.monitor.js"></script>

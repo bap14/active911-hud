@@ -28,15 +28,16 @@
     "electron": "^1.8.1",
     "graceful-fs": "^4.1.11",
     "hammerjs": "^2.0.8",
+    "html5sortable": "^0.7.0",
     "jquery": "^3.2.1",
+    "jquery-ui-dist": "^1.12.1",
     "knockout": "^3.4.2",
-    "knockout-sortablejs": "^0.1.0",
+    "knockout-sortable": "^1.1.0",
     "octicons": "^7.1.0",
     "popper.js": "^1.13.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "simple-oauth2": "^1.5.0",
-    "sortablejs": "^1.7.0",
     "sprintf-js": "^1.1.1"
   }
 }

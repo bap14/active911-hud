@@ -346,6 +346,10 @@ hosted-git-info@^2.1.4:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.5.0.tgz#6d60e34b3abbc8313062c3b798ef8d901a07af3c"
 
+html5sortable@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/html5sortable/-/html5sortable-0.7.0.tgz#62e9266d08853ea709c5c46011233ec0706ce67a"
+
 http-signature@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/http-signature/-/http-signature-1.2.0.tgz#9aecd925114772f3d95b65a60abb8f7c18fbace1"
@@ -431,6 +435,10 @@ joi@^12.0.0:
     isemail "3.x.x"
     topo "2.x.x"
 
+jquery-ui-dist@^1.12.1:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/jquery-ui-dist/-/jquery-ui-dist-1.12.1.tgz#5c0815d3cc6f90ff5faaf5b268a6e23b4ca904fa"
+
 jquery@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.2.1.tgz#5c4d9de652af6cd0a770154a631bba12b015c787"
@@ -472,9 +480,9 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
-knockout-sortablejs@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/knockout-sortablejs/-/knockout-sortablejs-0.1.0.tgz#54db48371bdbe898766d6ecb07ad12979acfe337"
+knockout-sortable@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/knockout-sortable/-/knockout-sortable-1.1.0.tgz#fc4f8adb68613950d39fe6bb8b0ccadead9485d2"
 
 knockout@^3.4.2:
   version "3.4.2"
@@ -822,10 +830,6 @@ sntp@2.x.x:
   resolved "https://registry.yarnpkg.com/sntp/-/sntp-2.1.0.tgz#2c6cec14fedc2222739caf9b5c3d85d1cc5a2cc8"
   dependencies:
     hoek "4.x.x"
-
-sortablejs@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.7.0.tgz#80a2b2370abd568e1cec8c271131ef30a904fa28"
 
 spdx-correct@~1.0.0:
   version "1.0.2"

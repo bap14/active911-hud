@@ -346,7 +346,7 @@ $(document).ready(() => {
     active911.on('active-alert-timer-stop', clearActiveAlert);
 
     $('#active911\\:googleMaps\\:zoom-value > span').text(active911Settings.config.googleMaps.zoom);
-    $('#active911\\:googleMaps\\:zoom').slider('setValue', active911Settings.config.googleMaps.zoom);
+    $('#active911\\:googleMaps\\:zoom').bootstrapSlider('setValue', active911Settings.config.googleMaps.zoom);
 
     $('#active911\\:googleMaps\\:zoom').on('slide', function (slideEvt) {
         $('#active911\\:googleMaps\\:zoom-value > span').text(slideEvt.value);
@@ -417,24 +417,10 @@ $(document).ready(() => {
     };
     active911SettingsModel.removeVocabulary = function (vocabulary) {
         active911SettingsModel.active911.responseVocabulary.remove(vocabulary);
-        setTimeout(active911SettingsModel.active911.responseVocabulary.reorderVocabularyTerms, 100);
-    };
-    active911SettingsModel.addVocabularyIDs = function (domElements, data) {
-        for (let i=0; i<domElements.length; i++) {
-            if ($(domElements[i]) && $('.responseCode > label', $(domElements[i]))) {
-                let elem = $(domElements[i]),
-                    increment = active911SettingsModel.active911.responseVocabulary.length + 1;
-
-                $('.responseCode > label', elem).attr('id', 'response-code-' + increment);
-                $('.responseCode > input', elem).attr('id', 'response-code-' + increment);
-
-                $('.responseLabel > label', elem).attr('id', 'response-label-' + increment);
-                $('.responseLabel > input', elem).attr('id', 'response-label-' + increment);
-            }
-        }
+        active911SettingsModel.reorderVocabularyTerms({ sourceParentNode: $('#active911\\:response-vocabulary-list') });
     };
     active911SettingsModel.reorderVocabularyTerms = function (evt) {
-        $('li', evt.srcElement).each((idx, elem) => {
+        $('li', evt.sourceParentNode).each((idx, elem) => {
             active911SettingsModel.active911.responseVocabulary.getItemById(elem.id).order(idx);
         });
     };
@@ -460,15 +446,4 @@ $(document).ready(() => {
     }
 
     active911.startup();
-    /*
-    Sortable.create(
-        $('#active911\\:response-vocabulary-list')[0],
-        {
-            animation: 200,
-            handle: '.handle',
-            draggable: '.draggable',
-            onSort: active911SettingsModel.reorderVocabularyTerms
-        }
-    );
-    */
 });
