@@ -10,7 +10,7 @@
     "appId": "com.github.users.noreply.bap14.active911-hud",
     "productName": "Active911 HUD",
     "copyright": "Copyright © 2017 ${author}",
-    "windows": {
+    "win": {
       "target": "nsis",
       "icon": "build/icons/active911.ico"
     },
@@ -33,14 +33,14 @@
     "prebuild": "npm run clean",
     "install": "electron-builder install-app-deps",
     "start": "npm run build && electron .",
-    "pack": "npm run prebuild && electron-builder --dir",
-    "dist": "npm run prebuild && electron-builder"
+    "pack": "npm run prebuild && npm run build && electron-builder --dir",
+    "dist": "npm run prebuild && npm run build && electron-builder"
   },
   "devDependencies": {
     "copy": "^0.3.1",
     "copy-files": "^0.1.0",
-    "electron": "~1.7.9",
-    "electron-builder": "^19.45.5",
+    "electron": "^1.8.2",
+    "electron-builder": "^20.2.0",
     "less": "^2.7.3",
     "less-plugin-clean-css": "^1.5.1",
     "rimraf": "^2.6.2"

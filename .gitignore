@@ -5,3 +5,4 @@ app/js/lib/*
 app/styles/bootstrap.min.css
 app/styles/bootstrap-theme.min.css
 app/styles/*
+dist/win-unpacked
