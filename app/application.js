@@ -18,7 +18,8 @@ let settingsWindow,
     hudWindow,
     oauthWindow,
     iconName = "active911.ico",
-    appIcon = path.join(__dirname, "images", "icons");
+    appIcon = path.join(__dirname, "images", "icons"),
+    tokenRefreshInterval;
 
 if (os.platform().toLowerCase() === "darwin") {
     iconName = "active911.icns";
@@ -30,9 +31,20 @@ global.active911 = require('./lib/active911.js')(global.active911Settings);
 
 function checkOAuthToken() {
     let auth = active911Settings.get('active911auth'),
-        expiresAt = new Date(auth.token.expires_at);
+        expiresAt = new Date(auth.token.expires_at),
+        currentTime = new Date();
 
-    // TODO: Start timer to check OAuth token every 120 minutes
+    // Attempt to refresh token within 15 minute window
+    if (expiresAt - currentTime <= (15 * 60 * 1000)) {
+        try {
+            active911.refreshToken();
+        } catch (err) {
+            // Start things over again
+            clearInterval(tokenRefreshInterval);
+            hudWindow.close();
+            createSplashScreen();
+        }
+    }
 }
 
 function createHUDWindow() {
@@ -45,8 +57,6 @@ function createHUDWindow() {
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
         hudWindow.show();
-        // hudWindow.webContents.openDevTools();
-
         if (splashScreen) {
             splashScreen.close();
         }
@@ -54,6 +64,7 @@ function createHUDWindow() {
     hudWindow.on('closed', () => hudWindow = null);
 
     checkOAuthToken();
+    tokenRefreshInterval = setInterval(checkOAuthToken, 60 * 1000);
 }
 
 function createOauthWindow(authUri) {
@@ -115,35 +126,34 @@ function createSettingsWindow(errorMessage) {
         if (settingsWindow.errorMessage) {
             settingsWindow.send('show-login-error', settingsWindow.errorMessage);
         }
-
-        if (splashScreen) {
-            //splashScreen.hide();
-        }
     });
 }
+
+const isExtraInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
+    if (hudWindow !== null) {
+        if (hudWindow.isMinimized()) hudWindow.restore();
+        hudWindow.focus();
+    }
+    console.log(commandLine);
+    console.log(workingDirectory);
+});
+if (isExtraInstance) app.quit();
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
+
 app.on('ready', () => {
     createSplashScreen();
 });
+
 app.on('activate', () => {
     if (hudWindow === null) {
         createHUDWindow();
     }
 });
-
-const isExtraInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
-   if (hudWindow !== null) {
-       if (hudWindow.isMinimized()) hudWindow.restore();
-       hudWindow.focus();
-   }
-   console.log(commandLine);
-});
-if (isExtraInstance) app.quit();
 
 app.setAsDefaultProtocolClient('active911hud');
 

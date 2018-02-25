@@ -37,6 +37,57 @@ $('#active911\\:google-maps\\:lookup-location').on('click', (e) => {
 $('#active911\\:settings-save').on('click', saveSettings);
 $('#active911\\:save-settings').on('click', saveSettings);
 
+function addPersonnelToLists(incident) {
+    for (let i=0; i < incident.responses.length; i++) {
+        let device = active911.getDevice(incident.responses[i].device.id),
+            elemId,
+            liElem,
+            listId,
+            visibleResponseType,
+            vocabulary;
+        if (typeof device !== "undefined" && typeof device.id !== "undefined") {
+            visibleResponseType = ko.unwrap(
+                active911SettingsModel.active911.responseVocabulary.vocabularyExists(
+                    incident.responses[i].response,
+                    'term'
+                )
+            );
+            if (
+                (
+                    incident.responses[i].response.toLowerCase() === "watch" &&
+                    ko.unwrap(active911SettingsModel.active911.showWatchers) === true
+                )
+                || visibleResponseType === true
+            ) {
+                vocabulary = active911SettingsModel.active911.responseVocabulary.retrieve(
+                    incident.responses[i].response,
+                    'term'
+                );
+                if (typeof vocabulary === "undefined") {
+                    console.error('Failed to load vocabulary term "' + incident.responses[i].response + '"');
+                    return;
+                }
+
+                elemId = 'device-' + device.id;
+
+                if ($(elemId)) {
+                    $(elemId).remove();
+                }
+
+                liElem = document.createElement('li');
+                listId = '#active911\\:response-type\\:' + vocabulary.id();
+
+                $(liElem).attr('id', 'device-' + device.id)
+                    .addClass('list-group-item')
+                    .addClass('responding-personnel')
+                    .html('<h4>' + device.name + '</h4>');
+
+                $(listId).find('.card-body .personnel').append(liElem);
+            }
+        }
+    }
+}
+
 function clearActiveAlert() {
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
     $('#active911\\:active-alert-container').hide();
@@ -60,21 +111,10 @@ function googleMapInitializeCallback() {
 }
 
 function saveSettings(e) {
-    "use strict";
     e.stopPropagation();
-    let settings = ko.mapping.toJS(active911SettingsModel);
-    settings.googleMaps.zoom = parseInt(settings.googleMaps.zoom);
-    settings.active911.clearOldAlerts = Boolean(settings.active911.clearOldAlerts).valueOf();
-    settings.active911.showWatchers = active911SettingsModel.toggleIncludeWatchers();
-    active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey)
-        .set('googleMaps', settings.googleMaps)
-        .set('active911', settings.active911);
-    active911Settings.save();
-
-    active911Map.updateOptions(settings.googleMaps);
+    writeSettings();
+    active911Map.updateOptions(active911Settings.get('googleMaps'));
     $('#active911\\:close-settings').click();
-
-    return false;
 }
 
 /**
@@ -105,7 +145,11 @@ function showActiveAlert() {
         )
     );
 
+    // Clear out responding personnel lists
+    $('.respondingPersonnel .card-body .personnel').html('');
+
     showPersonnelMarkers(active911.activeAlert);
+    addPersonnelToLists(active911.activeAlert);
 
     $('#active911-hud > .navbar.sticky-top').addClass('bg-active-alert');
     $('#active911\\:active-alert-container').html(alert);
@@ -254,10 +298,21 @@ function updateTimer() {
     setTimeout(updateTimer, 250);
 }
 
+function writeSettings() {
+    let settings = ko.mapping.toJS(active911SettingsModel);
+    settings.googleMaps.zoom = parseInt(settings.googleMaps.zoom);
+    settings.active911.clearOldAlerts = Boolean(settings.active911.clearOldAlerts).valueOf();
+    settings.active911.showWatchers = active911SettingsModel.toggleIncludeWatchers();
+    active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey)
+        .set('googleMaps', settings.googleMaps)
+        .set('active911', settings.active911);
+    active911Settings.save();
+}
+
 function VocabularyWord(term, label, order, id) {
     let self = this, itemOrder;
 
-    if (typeof id === "undefined" || id === null) {
+    if (typeof id === "undefined" || id === null || !/^[a-z0-9]{4}(?:-[a-z0-9]{4}){3}$/i.test(id)) {
         id = self.generateRandomId();
     }
 
@@ -310,6 +365,14 @@ VocabularyWord.prototype.getNewOrder = function () {
 active911.on('new-alert', () => {
     updateGoogleRoute(active911.activeAlert);
     showActiveAlert();
+});
+
+active911.on('updating-alerts-start', () => {
+    $('#active911\\:updating-alerts').show();
+});
+
+active911.on('updating-alerts-end', () => {
+    $('#active911\\:updating-alerts').hide();
 });
 
 active911.on('alerts-updated', () => {
@@ -378,6 +441,21 @@ $(document).ready(() => {
         return false;
     };
 
+    ko.observableArray.fn.retrieve = function (value, objectKey) {
+        let allItems = this(), i=0, unwrapped;
+        for (i; i<allItems.length; i++) {
+            unwrapped = ko.unwrap(allItems[i][objectKey]);
+            if (typeof value === "string") {
+                if (unwrapped.toLowerCase() === value.toLowerCase()) {
+                    return allItems[i];
+                }
+            } else if (unwrapped === value) {
+                return allItems[i];
+            }
+        }
+        return ko.pureComputed(() => { return undefined });
+    };
+
     /** Support bootstrap-toggle checkbox elements **/
     ko.bindingHandlers.toggled = {
         init: (elem, valueAccessor) => {
@@ -403,7 +481,7 @@ $(document).ready(() => {
                 typeof active911Settings.config.active911.responseVocabulary[i].order !== "undefined"
                     ? parseInt(active911Settings.config.active911.responseVocabulary[i].order) : -1,
                 typeof active911Settings.config.active911.responseVocabulary[i].id !== "undefined"
-                    ? parseInt(active911Settings.config.active911.responseVocabulary[i].id) : null,
+                    ? active911Settings.config.active911.responseVocabulary[i].id : null,
 
             )
         );
@@ -424,6 +502,7 @@ $(document).ready(() => {
     };
     active911SettingsModel.toggleIncludeWatchers = ko.observable(active911Settings.config.active911.showWatchers);
     ko.applyBindings(active911SettingsModel);
+    writeSettings();
 
     $('#active911\\:settings').dependentFields();
 

@@ -177,6 +177,17 @@ module.exports = function (active911Settings) {
         return uri;
     };
 
+    Active911.prototype.refreshToken = function () {
+        let token = active911Settings.getOauthToken();
+        token = oauth2.accessToken.create(token);
+        token.refresh().then((result) => {
+            active911Settings.setOauthToken(result).save();
+            ipcMain.emit('oauth-complete');
+        }).catch((error) => {
+            active911Settings.setOauthToken({}).save();
+        });
+    };
+
     Active911.prototype.setActiveAlert = function () {
         if (this.alerts.length > 0) {
             let alert = this.alerts[0];
@@ -234,8 +245,9 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.updateAlerts = function () {
-        var that = this;
-        this.getAlerts()
+        let that = this;
+        that.emit('updating-alerts-start');
+        that.getAlerts()
             .then((response) => {
                 let alerts = response.alerts,
                     promises = [];
@@ -264,7 +276,10 @@ module.exports = function (active911Settings) {
                         that.emit('alerts-updated');
                         ipcMain.emit('active911-alerts-updated');
                     })
-                    .catch((e) => { console.error(e); });
+                    .catch((e) => { console.error(e); })
+                    .then(() => {
+                        that.emit('updating-alerts-end');
+                    });
             })
             .catch((err) => {
                 console.error(err.message);
