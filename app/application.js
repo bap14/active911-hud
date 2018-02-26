@@ -68,7 +68,8 @@ function createHUDWindow() {
 }
 
 function createOauthWindow(authUri) {
-    splashScreen.send('add-status-message', 5);
+    if (splashScreen) splashScreen.send('add-status-message', 5);
+
     oauthWindow = new BrowserWindow({ width: 800, height: 560, parent: hudWindow, modal: true, frame: true, icon: appIcon, show: false });
     oauthWindow.once('ready-to-show', () => {
         oauthWindow.show();
@@ -84,13 +85,14 @@ function createOauthWindow(authUri) {
             oauthWindow.hide();
             let uri = active911.parseURI(loadedUrl);
 
-            splashScreen.send('add-status-message', 20);
+            if (splashScreen) splashScreen.send('add-status-message', 20);
             active911.exchangeAuthToken(uri.queryKey.code);
+            if (!splashScreen) hudWindow.send('oauth-updated');
         }
     });
     oauthWindow.on("closed", () => {
         oauthWindow = null;
-        splashScreen.show();
+        if (splashScreen) splashScreen.show();
     });
 }
 
@@ -160,6 +162,11 @@ app.setAsDefaultProtocolClient('active911hud');
 ipcMain.on('show-settings-window', () => {
     createSettingsWindow();
 });
+ipcMain.on('restart-app', () => {
+    hudWindow.hide();
+    createSplashScreen();
+    hudWindow.close();
+});
 
 ipcMain.on('check-oauth', () => {
     active911.validateToken();
@@ -173,15 +180,20 @@ ipcMain.on('oauth-error', (error) => {
 ipcMain.on('oauth-complete', () => {
     if (oauthWindow) {
         oauthWindow.close();
+        oauthWindow = null;
     }
 
-    splashScreen.send('add-status-message', 70);
+    if (splashScreen) {
+        splashScreen.send('add-status-message', 70);
 
-    if (!active911Settings.getGoogleMapsApiKey()) {
-        createSettingsWindow();
+        if (!active911Settings.getGoogleMapsApiKey()) {
+            createSettingsWindow();
+        } else {
+            splashScreen.send('add-status-message', 100);
+            createHUDWindow();
+        }
     } else {
-        splashScreen.send('add-status-message', 100);
-        createHUDWindow();
+        hudWindow.send('oauth-update-complete');
     }
 });
 ipcMain.on('settings-saved', () => {

@@ -78,10 +78,15 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label for="active911:token">Access Token</label>
-                                <input id="active911:token" class="form-control-plaintext"
-                                       data-bind="text: active911auth.token.access_token,
+                                <div class="input-group">
+                                    <input id="active911:token" class="form-control"
+                                           data-bind="text: active911auth.token.access_token,
                                                   value: active911auth.token.access_token"
-                                       readonly />
+                                           readonly />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-info" id="active911:reauthorize">Reauthorize</button>
+                                    </div>
+                                </div>
                                 <p class="form-text text-muted">
                                     This token will automatically refresh before it expires.
                                 </p>
@@ -160,7 +165,13 @@
                                                visible: active911.responseVocabulary().length > 0"
                                     id="active911:response-vocabulary-list"
                                     class="mt-2 mb-2 list-group-flush">
-                                    <li class="list-group-item form-row mb-1 draggable">
+                                    <li class="list-group-item form-row mb-1 draggable"
+                                        data-bind="css: {
+                                                    'bg-success text-light': order() === 0,
+                                                    'bg-warning text-dark': order() === 1,
+                                                    'bg-info text-dark': order() === 2,
+                                                    'bg-dark text-light': order() >= 3
+                                               }">
                                         <div class="col-sm-2">
                                             <span class="handle">::</span>
                                             <span data-bind="text: order"></span>
@@ -209,7 +220,7 @@
                                            placeholder="1600 Pennsylvania Ave, Washington D.C. 20202"
                                            data-bind="text: googleMaps.centerAddress,
                                                       value: googleMaps.centerAddress" />
-                                    <span class="input-group-btn">
+                                    <span class="input-group-append">
                                         <button class="btn btn-info" id="active911:google-maps:lookup-location">
                                             <script>document.write(octicons.search.toSVG({ "height": 22 }))</script>
                                             <span class="sr-only">Lookup</span>
@@ -277,26 +288,34 @@
     <div id="active911:active-alert-template">
         <div role="alert">
             <div class="card">
-                <div class="card-header bg-warning"><h3 class="location-name"></h3></div>
+                <div class="card-header bg-danger"><h3 class="text-light location-name"></h3></div>
                 <div class="card-body">
                     <div class="row">
                         <address class="col-lg-6"></address>
                         <p class="col-lg-6 description"></p>
                     </div>
                 </div>
-                <div class="card-footer text-muted">
+                <div class="card-footer bg-dark text-muted">
                     <span class="alert-time"></span>
                 </div>
             </div>
             <div class="row respondingPersonnel">
                 <!-- ko foreach: active911.responseVocabulary -->
-                <div class="card col-sm-5 ml-2 responding-personnel"
-                     data-bind="attr: { id: 'active911:response-type:' + id() }">
-                    <div class="card-header bg-dark">
-                        <h3 class="text-light response-type" data-bind="text: label"></h3>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush personnel"></ul>
+                <div class="col-sm-6" data-bind="visible: hasRespondingPersonnel">
+                    <div class="card responding-personnel"
+                         data-bind="attr: { id: 'active911:response-type:' + id() }">
+                        <div class="card-header"
+                             data-bind="css: {
+                                    'bg-success text-light': order() === 0,
+                                    'bg-warning text-dark': order() === 1,
+                                    'bg-info text-dark': order() === 2,
+                                    'bg-dark text-light': order() >= 3
+                                }">
+                            <h3 class="text-light response-type" data-bind="text: label"></h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush personnel"></ul>
+                        </div>
                     </div>
                 </div>
                 <!-- /ko -->
