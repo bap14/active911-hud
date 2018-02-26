@@ -9,7 +9,7 @@
   "build": {
     "appId": "com.github.users.noreply.bap14.active911-hud",
     "productName": "Active911 HUD",
-    "copyright": "Copyright © 2017 ${author}",
+    "copyright": "Copyright © 2018 ${author}",
     "win": {
       "target": "nsis",
       "icon": "build/icons/active911.ico"
