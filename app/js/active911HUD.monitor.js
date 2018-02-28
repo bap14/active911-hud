@@ -43,6 +43,12 @@ $('#active911\\:settings-save').on('click', saveSettings);
 $('#active911\\:save-settings').on('click', saveSettings);
 
 function addPersonnelToLists(incident) {
+    // Hide all response vocabulary terms
+    for (let n=0; n < active911SettingsModel.active911.responseVocabulary().length; n++) {
+        console.info('Hiding "' + active911SettingsModel.active911.responseVocabulary()[n].term() + '" section');
+        active911SettingsModel.active911.responseVocabulary()[n].hasRespondingPersonnel(false);
+    }
+
     for (let i=0; i < incident.responses.length; i++) {
         let device = active911.getDevice(incident.responses[i].device.id),
             elemId,
@@ -50,6 +56,7 @@ function addPersonnelToLists(incident) {
             listId,
             visibleResponseType,
             vocabulary;
+
         if (typeof device !== "undefined" && typeof device.id !== "undefined") {
             visibleResponseType = ko.unwrap(
                 active911SettingsModel.active911.responseVocabulary.vocabularyExists(
@@ -57,10 +64,11 @@ function addPersonnelToLists(incident) {
                     'term'
                 )
             );
+
             if (
                 (
                     incident.responses[i].response.toLowerCase() === "watch" &&
-                    ko.unwrap(active911SettingsModel.active911.showWatchers) === true
+                    active911SettingsModel.active911.showWatchers === true
                 )
                 || visibleResponseType === true
             ) {
@@ -75,8 +83,8 @@ function addPersonnelToLists(incident) {
 
                 elemId = 'device-' + device.id;
 
-                if ($(elemId)) {
-                    $(elemId).remove();
+                if ($('#' + elemId)) {
+                    $('#' + elemId).remove();
                 }
 
                 liElem = document.createElement('li');
@@ -98,9 +106,6 @@ function clearActiveAlert() {
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
     $('#active911\\:active-alert-container').hide();
     $('#active911\\:active-alert-container').html('');
-    for (let i=0; i<active911SettingsModel.active911.responseVocabulary().length; i++) {
-        active911SettingsModel.active911.responseVocabulary()[i].hasRespondingPersonnel(false);
-    }
 }
 
 function clearPersonnelMarker(device) {
@@ -144,24 +149,25 @@ function saveSettings(e) {
  */
 function showActiveAlert() {
     "use strict";
-    let address = '',
+    let activeAlert = active911.getActiveAlert(),
+        address = '',
         alert = $('#active911\\:active-alert-template > [role="alert"]').clone();
 
-    alert.attr('id', 'active-alert-' + active911.activeAlert.id);
+    alert.attr('id', 'active-alert-' + activeAlert.id);
 
-    $('.location-name', alert).text('#' + active911.activeAlert.cad_code + ' ' + active911.activeAlert.description); // active911.activeAlert.address);
+    $('.location-name', alert).text('#' + activeAlert.cad_code + ' ' + activeAlert.description); // activeAlert.address);
 
-    if (active911.activeAlert.place) address += active911.activeAlert.place + "\n";
-    address += active911.activeAlert.address;
-    if (active911.activeAlert.unit) address += " " + active911.activeAlert.unit;
-    address += "\n" + active911.activeAlert.city + ", " + active911.activeAlert.state;
+    if (activeAlert.place) address += activeAlert.place + "\n";
+    address += activeAlert.address;
+    if (activeAlert.unit) address += " " + activeAlert.unit;
+    address += "\n" + activeAlert.city + ", " + activeAlert.state;
 
     $('address', alert).text(address);
 
-    $('.description', alert).text(active911.activeAlert.description);
+    $('.description', alert).text(activeAlert.description);
 
     $('.alert-time', alert).text(
-        "Received: " + active911.activeAlert.received.toLocaleDateString(
+        "Received: " + activeAlert.received.toLocaleDateString(
             "en-US",
             {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'}
         )
@@ -170,8 +176,8 @@ function showActiveAlert() {
     // Clear out responding personnel lists
     $('.respondingPersonnel .card-body .personnel .list-group-item').remove();
 
-    showPersonnelMarkers(active911.activeAlert);
-    addPersonnelToLists(active911.activeAlert);
+    showPersonnelMarkers(activeAlert);
+    addPersonnelToLists(activeAlert);
 
     $('#active911-hud > .navbar.sticky-top').addClass('bg-active-alert');
     $('#active911\\:active-alert-container').html(alert);
@@ -182,7 +188,7 @@ function showPersonnelMarkers(incident) {
     let visibleDevices = [];
     for (let n=0; n < active911.devices.length; n++) {
         let device = active911.getDevice(active911.devices[i].device.id);
-        if (typeof device.mapMarker === "google.maps.Marker") {
+        if (typeof device.mapMarker === "object" && device.mapMarker instanceof google.maps.Marker) {
             visibleDevices.push(device.id);
         }
     }
@@ -288,7 +294,12 @@ function updateGoogleRoute(incident) {
 
 function updatePersonnelMarker(device, response) {
     active911.cacheDevice(device.id).then(() => {
-        if (typeof device.mapMarker === "google.maps.Marker") {
+        let deviceContent = '<h4 class="text-center">' + device.name + '</h4>'
+                + '<p class="text-center"><small>'
+                + active911SettingsModel.active911.responseVocabulary.retrieve(response.response, 'term').label()
+                + '</small></p>';
+
+        if (typeof device.mapMarker !== "undefined" && device.mapMarker instanceof google.maps.Marker) {
             device.mapMarker.setMap(active911Map.googleMap);
             device.mapMarker.setOptions({
                 position: {lat: device.latitude, lng: device.longitude }
@@ -296,15 +307,20 @@ function updatePersonnelMarker(device, response) {
         } else {
             device.mapMarker = new google.maps.Marker({
                 map: active911Map.googleMap,
-                icon: { url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-personnel.png" },
-                position: new google.maps.LatLng({ lat: device.latitude, lng: device.longitude })
+                icon: {url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-personnel.png"},
+                position: new google.maps.LatLng({lat: device.latitude, lng: device.longitude})
             });
-            if (typeof device.mapMarkerInfo === "undefined" || device.mapMarkerInfo === null) {
-                device.mapMarkerInfo = new google.maps.InfoWindow({
-                    disableAutoPan: true,
-                    content: device.name
-                });
-            }
+        }
+
+        if (typeof device.mapMarkerInfo === "undefined" || !(device.mapMarkerInfo instanceof google.maps.InfoWindow)) {
+            device.mapMarkerInfo = new google.maps.InfoWindow({
+                disableAutoPan: active911SettingsModel.panToShowAllMarkers(),
+                content: deviceContent
+            });
+        } else {
+            console.log('Closing map marker info window');
+            device.mapMarkerInfo.close();
+            device.mapMarkerInfo.setContent(deviceContent);
         }
         device.mapMarkerInfo.open(active911Map.googleMap, device.mapMarker);
     }).catch((err) => {
@@ -325,6 +341,7 @@ function writeSettings() {
     settings.googleMaps.zoom = parseInt(settings.googleMaps.zoom);
     settings.active911.clearOldAlerts = Boolean(settings.active911.clearOldAlerts).valueOf();
     settings.active911.showWatchers = active911SettingsModel.toggleIncludeWatchers();
+    settings.mapOptions.panToShowAllMarkers = active911SettingsModel.panToShowAllMarkers();
     active911Settings.setGoogleMapsApiKey(settings.googleMapsApiKey)
         .set('googleMaps', settings.googleMaps)
         .set('active911', settings.active911);
@@ -386,7 +403,7 @@ VocabularyWord.prototype.getNewOrder = function () {
 };
 
 active911.on('new-alert', () => {
-    updateGoogleRoute(active911.activeAlert);
+    updateGoogleRoute(active911.getActiveAlert());
     showActiveAlert();
 });
 
@@ -407,6 +424,10 @@ active911.on('alerts-updated', () => {
     $(active911.alerts).each((i, alert) => {
         updateAlert(alert);
     });
+    if (active911.getActiveAlert()) {
+        showPersonnelMarkers(active911.getActiveAlert());
+        addPersonnelToLists(active911.getActiveAlert());
+    }
 });
 
 ipcRenderer.on('oauth-update-complete', () => {
@@ -523,7 +544,8 @@ $(document).ready(() => {
             active911SettingsModel.active911.responseVocabulary.getItemById(elem.id).order(idx);
         });
     };
-    active911SettingsModel.toggleIncludeWatchers = ko.observable(active911Settings.config.active911.showWatchers);
+    active911SettingsModel.toggleIncludeWatchers = ko.observable(active911Settings.config.active911.showWatchers || false);
+    active911SettingsModel.panToShowAllMarkers = ko.observable(active911Settings.config.mapOptions.panToShowAllMarkers || false);
     ko.applyBindings(active911SettingsModel);
     writeSettings();
 

@@ -237,6 +237,18 @@
                                     <h3>Looking Up Address &hellip;</h3>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <input type="checkbox"
+                                       id="active911:pan-to-show-all-markers"
+                                       value="1"
+                                       data-toggle="toggle"
+                                       data-bind="toggled: panToShowAllMarkers"
+                                       data-on="Yes"
+                                       data-off="No"
+                                       data-onstyle="success"
+                                       data-offstyle="danger" />
+                                <label for="active911:pan-to-show-all-markers">Zoom map out to show all personnel markers</label>
+                            </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
@@ -301,7 +313,7 @@
             </div>
             <div class="row respondingPersonnel">
                 <!-- ko foreach: active911.responseVocabulary -->
-                <div class="col-sm-6" data-bind="visible: hasRespondingPersonnel">
+                <div class="col-sm-6"><!--data-bind="visible: hasRespondingPersonnel"-->
                     <div class="card responding-personnel"
                          data-bind="attr: { id: 'active911:response-type:' + id() }">
                         <div class="card-header"

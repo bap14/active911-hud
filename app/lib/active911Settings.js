@@ -52,6 +52,9 @@ module.exports = function () {
                 },
                 mapTypeId: 'roadmap',
                 zoom: 12,
+            },
+            mapOptions: {
+                panToShowAllMarkers: false
             }
         }, storedConfig);
     };
