@@ -260,6 +260,7 @@ module.exports = function (active911Settings) {
         this.cacheDevices()
             .then(() => {
                 ipcMain.emit('active911-agency-updated');
+                ipcMain.emit('active911-ready');
 
                 this.updateAlerts();
 
@@ -355,7 +356,14 @@ module.exports = function (active911Settings) {
 
     Active911.prototype.validateToken = function () {
         let token = active911Settings.getOauthToken();
-        if (token === false) {
+        if (
+            token === false ||
+            (
+                typeof token === "object" &&
+                typeof token.access_token !== "undefined" &&
+                token.access_token === false
+            )
+        ) {
             const authorizationUri = oauth2.authorizationCode.authorizeURL({
                 response_type: "code",
                 redirection_uri: 'https://bap14.github.io/active911-hud/oauth.html',

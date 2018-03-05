@@ -56,10 +56,7 @@ function createHUDWindow() {
     hudWindow.hide();
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
-        hudWindow.show();
-        if (splashScreen) {
-            splashScreen.close();
-        }
+        splashScreen.send('main-window-ready');
     });
     hudWindow.on('closed', () => hudWindow = null);
 
@@ -136,8 +133,6 @@ const isExtraInstance = app.makeSingleInstance((commandLine, workingDirectory) =
         if (hudWindow.isMinimized()) hudWindow.restore();
         hudWindow.focus();
     }
-    console.log(commandLine);
-    console.log(workingDirectory);
 });
 if (isExtraInstance) app.quit();
 
@@ -184,14 +179,10 @@ ipcMain.on('oauth-complete', () => {
     }
 
     if (splashScreen) {
-        splashScreen.send('add-status-message', 70);
+        splashScreen.send('add-status-message', 90);
 
-        if (!active911Settings.getGoogleMapsApiKey()) {
-            createSettingsWindow();
-        } else {
-            splashScreen.send('add-status-message', 100);
-            createHUDWindow();
-        }
+        // splashScreen.send('add-status-message', 100);
+        createHUDWindow();
     } else {
         hudWindow.send('oauth-update-complete');
     }
@@ -206,6 +197,12 @@ ipcMain.on('settings-saved', () => {
         hudWindow.close();
         createSplashScreen();
     }
+});
+ipcMain.on('splash-complete', () => {
+    if (splashScreen) {
+        splashScreen.close();
+    }
+    hudWindow.show();
 });
 ipcMain.on('login-failure', (evt, message) => {
     createSettingsWindow(message);

@@ -41,11 +41,11 @@
 
         ipcRenderer.on('main-window-ready', () => {
             updateStatus(100);
-            ipcRenderer.send('splash-complete');
+            setTimeout(() => {ipcRenderer.send('splash-complete'); }, 800);
         });
 
         $(document).ready(function () {
-            updateStatus(10);
+            updateStatus(45);
             ipcRenderer.send('check-oauth');
         })
     </script>

@@ -125,6 +125,7 @@ function googleMapInitializeCallback() {
 }
 
 function initGoogleMap() {
+    let retval = false;
     if (active911Settings.getGoogleMapsApiKey()) {
         active911Map = new Active911HUDMap(
             active911,
@@ -134,7 +135,9 @@ function initGoogleMap() {
             active911Settings.config.googleMaps,
             active911Settings.config.active911.alerts
         );
+        retval = true;
     }
+    return retval;
 }
 
 function saveSettings(e) {
@@ -445,6 +448,7 @@ ipcRenderer.on('agency-updated', () => {
 });
 
 $(document).ready(() => {
+    let gMapInitialized;
     updateTimer();
 
     active911.on('active-alert-timer-start', showActiveAlert);
@@ -556,7 +560,12 @@ $(document).ready(() => {
         $(elem).addClass('btn-light');
     });
 
-    initGoogleMap();
+    gMapInitialized = initGoogleMap();
 
     active911.startup();
+
+    if (!gMapInitialized) {
+        $('#active911\\:google-maps-api').addClass('is-invalid');
+        $('#active911\\:open-settings').click();
+    }
 });
