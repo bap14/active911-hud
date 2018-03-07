@@ -179,19 +179,27 @@ ipcMain.on('oauth-complete', () => {
     }
 
     if (splashScreen) {
-        splashScreen.send('add-status-message', 90);
+        splashScreen.send('add-status-message', 80);
+
+        if (!active911Settings.getGoogleMapsApiKey()) {
+            createSettingsWindow();
+        } else {
+            ipcMain.emit('settings-saved');
+        }
 
         // splashScreen.send('add-status-message', 100);
-        createHUDWindow();
+        //createHUDWindow();
     } else {
         hudWindow.send('oauth-update-complete');
     }
 });
 ipcMain.on('settings-saved', () => {
     if (!hudWindow || hudWindow.isHidden()) {
-        settingsWindow.close();
+        if (settingsWindow) {
+            settingsWindow.close();
+        }
         splashScreen.show();
-        splashScreen.send('add-update-message', 100);
+        splashScreen.send('add-update-message', 90);
         createHUDWindow();
     } else {
         hudWindow.close();

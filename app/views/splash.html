@@ -41,7 +41,7 @@
 
         ipcRenderer.on('main-window-ready', () => {
             updateStatus(100);
-            setTimeout(() => {ipcRenderer.send('splash-complete'); }, 800);
+            setTimeout(() => {ipcRenderer.send('splash-complete'); }, 1000);
         });
 
         $(document).ready(function () {
