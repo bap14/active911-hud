@@ -200,7 +200,7 @@ module.exports = function (active911Settings) {
         let that = this;
         return new Promise((resolve, reject) => {
             if (that.alerts.length > 0) {
-                let alert = that.alerts[0], n = 0, oldDate, newDate, response, responses = {}, isNewActiveAlert = false;
+                let alert = that.alerts[0], n = 0, oldDate, newDate, response, responses = {}, isNewActiveAlert;
 
                 isNewActiveAlert = (
                     (that.activeAlert === null || alert.id !== that.activeAlertId)
@@ -240,7 +240,6 @@ module.exports = function (active911Settings) {
                     }
                 }
                 that.alerts[0].responses = Object.values(responses);
-                console.log(that.alerts[0].responses);
 
                 if (isNewActiveAlert) {
                     that.emit('new-alert');

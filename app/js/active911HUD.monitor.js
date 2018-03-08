@@ -168,6 +168,7 @@ function showActiveAlert() {
     $('address', alert).text(address);
 
     $('.description', alert).text(activeAlert.description);
+    $('.units-alerted', alert).text(activeAlert.units);
 
     $('.alert-time', alert).text(
         "Received: " + activeAlert.received.toLocaleDateString(
