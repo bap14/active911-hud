@@ -5,7 +5,6 @@
     <base href="../" />
     <title>Startup - Active911 HUD</title>
     <link rel="stylesheet" href="styles/lib/bootstrap.min.css" />
-    <link rel="stylesheet" href="styles/lib/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="styles/style.css" />
     <script>
         const remote = require('electron').remote;
@@ -18,6 +17,7 @@
 <body class="splash-window">
     <div id="wrapper">
         <div id="logo">Active 911 HUD</div>
+        <p id="status-line"></p>
         <div id="status-bar" class="progress">
             <div class="progress-bar progress-bar-danger progress-bar-striped progress-bar-animated bg-primary"
                  role="progressbar" style="width: 0%">
@@ -29,18 +29,23 @@
     <script src="js/lib/bootstrap.min.js"></script>
 
     <script>
-        function updateStatus(barWidth) {
+        function updateStatus(barWidth, message) {
             if (typeof barWidth !== "undefined" && barWidth >= 0 && barWidth <= 100) {
                 $('#status-bar > .progress-bar').animate({width: barWidth + '%'}, 200);
             }
+            message = message ? message + ' &hellip;' : '';
+            $('#status-line').html(message);
         }
 
-        ipcRenderer.on('add-status-message', (evt, barWidth) => {
-            updateStatus(barWidth);
+        ipcRenderer.on('add-status-message', (evt, barWidth, message) => {
+            if (typeof message === 'undefined') {
+                message = '';
+            }
+            updateStatus(barWidth, message);
         });
 
         ipcRenderer.on('main-window-ready', () => {
-            updateStatus(100);
+            updateStatus(100, 'Launching');
             setTimeout(() => {ipcRenderer.send('splash-complete'); }, 1000);
         });
 

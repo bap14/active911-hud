@@ -65,7 +65,7 @@ function createHUDWindow() {
 }
 
 function createOauthWindow(authUri) {
-    if (splashScreen) splashScreen.send('add-status-message', 5);
+    if (splashScreen) splashScreen.send('add-status-message', 10, 'Obtaining Active911 Authorization');
 
     oauthWindow = new BrowserWindow({ width: 800, height: 560, parent: hudWindow, modal: true, frame: true, icon: appIcon, show: false });
     oauthWindow.once('ready-to-show', () => {
@@ -82,13 +82,19 @@ function createOauthWindow(authUri) {
             oauthWindow.hide();
             let uri = active911.parseURI(loadedUrl);
 
-            if (splashScreen) splashScreen.send('add-status-message', 20);
+            if (splashScreen) splashScreen.send('add-status-message', 20, 'Authenticating with Active911');
             active911.exchangeAuthToken(uri.queryKey.code);
             if (!splashScreen) hudWindow.send('oauth-updated');
         }
     });
     oauthWindow.on("closed", () => {
         oauthWindow = null;
+        if (!active911Settings.hasOauthToken()) {
+            if (splashScreen) {
+                splashScreen.send('add-status-message', undefined, 'Oauth Incomplete, exiting application');
+                ipcMain.emit('exit-application');
+            }
+        }
         if (splashScreen) splashScreen.show();
     });
 }
@@ -140,6 +146,7 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+    app.exit();
 });
 
 app.on('ready', () => {
@@ -179,7 +186,7 @@ ipcMain.on('oauth-complete', () => {
     }
 
     if (splashScreen) {
-        splashScreen.send('add-status-message', 80);
+        splashScreen.send('add-status-message', 80, 'Authentication Complete');
 
         if (!active911Settings.getGoogleMapsApiKey()) {
             createSettingsWindow();
@@ -199,7 +206,7 @@ ipcMain.on('settings-saved', () => {
             settingsWindow.close();
         }
         splashScreen.show();
-        splashScreen.send('add-update-message', 90);
+        splashScreen.send('add-status-message', 90, 'Loading monitor');
         createHUDWindow();
     } else {
         hudWindow.close();
@@ -228,7 +235,10 @@ ipcMain.on('active911-new-alert', () => {
     hudWindow.send('new-alert');
 });
 ipcMain.on('exit-application', () => {
-    app.quit();
+    if (splashScreen) splashScreen.close();
+    if (oauthWindow) oauthWindow.close();
+    if (settingsWindow) settingsWindow.close();
+    if (hudWindow) hudWindow.close();
 });
 ipcMain.on('launch-google', () => {
     electron.shell.openExternal('https://console.developers.google.com/apis/credentials');

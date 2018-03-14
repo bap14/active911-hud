@@ -22,7 +22,8 @@
 </div>
 <script>
     ipcRenderer.on('load-oauth-url', (event, data) => {
-        $('#oauth-window')[0].src = data.url;
+        // $('#oauth-window')[0].src = data.url;
+        console.log('Loading oauth URL: ' + data.url);
     });
 
     $(document).ready(function () {
