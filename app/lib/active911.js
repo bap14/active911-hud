@@ -294,6 +294,11 @@ module.exports = function (active911Settings) {
         }
     };
 
+    Active911.prototype.stopUpdatingDevices = function () {
+        clearTimeout(this.deviceUpdater);
+        this.deviceUpdater = null;
+    };
+
     Active911.prototype.updateAlerts = function () {
         let that = this;
         that.emit('updating-alerts-start');

@@ -305,15 +305,24 @@
             <div class="card">
                 <div class="card-header bg-danger"><h3 class="text-light location-name"></h3></div>
                 <div class="card-body">
-                    <div class="row">
-                        <address class="col-lg-6"></address>
-                        <p class="col-lg-6 description"></p>
+                    <div class="card-deck">
+                        <div class="card border-0">
+                            <h5 class="text-muted">Location:</h5>
+                            <address></address>
+                        </div>
+                        <div class="card border-0">
+                            <h5 class="text-muted">Description</h5>
+                            <p class="description"></p>
+                        </div>
                     </div>
                     <div class="row">
-                        <p class="col-lg-6 units-alerted"></p>
+                        <p class="col-lg-12">
+                            <span class="text-muted">Units Alerted:</span>
+                            <span class="units-alerted"></span>
+                        </p>
                     </div>
                 </div>
-                <div class="card-footer bg-dark text-muted">
+                <div class="card-footer bg-light text-muted">
                     <span class="alert-time"></span>
                 </div>
             </div>

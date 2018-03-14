@@ -143,6 +143,9 @@ const isExtraInstance = app.makeSingleInstance((commandLine, workingDirectory) =
 if (isExtraInstance) app.quit();
 
 app.on('window-all-closed', () => {
+    active911.stopActiveAlertTimer();
+    active911.stopUpdatingDevices();
+
     if (process.platform !== 'darwin') {
         app.quit();
     }
@@ -235,6 +238,9 @@ ipcMain.on('active911-new-alert', () => {
     hudWindow.send('new-alert');
 });
 ipcMain.on('exit-application', () => {
+    active911.stopActiveAlertTimer();
+    active911.stopUpdatingDevices();
+
     if (splashScreen) splashScreen.close();
     if (oauthWindow) oauthWindow.close();
     if (settingsWindow) settingsWindow.close();
