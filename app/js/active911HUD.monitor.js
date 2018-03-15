@@ -11,6 +11,11 @@ $('#active911\\:exit').on('click', (e) => {
 });
 $('#active911\\:reauthorize').on('click', (e) => {
     e.stopPropagation();
+
+    active911.stopUpdatingAlerts();
+    active911.stopUpdatingDevices();
+    active911.stopActiveAlertTimer();
+
     active911Settings.setOauthToken(false).save();
     ipcRenderer.send('restart-app');
 });
@@ -45,7 +50,6 @@ $('#active911\\:save-settings').on('click', saveSettings);
 function addPersonnelToLists(incident) {
     // Hide all response vocabulary terms
     for (let n=0; n < active911SettingsModel.active911.responseVocabulary().length; n++) {
-        console.info('Hiding "' + active911SettingsModel.active911.responseVocabulary()[n].term() + '" section');
         active911SettingsModel.active911.responseVocabulary()[n].hasRespondingPersonnel(false);
     }
 
@@ -81,7 +85,7 @@ function addPersonnelToLists(incident) {
                     return;
                 }
 
-                elemId = 'device-' + device.id;
+                elemId = 'device-' + device.id();
 
                 if ($('#' + elemId)) {
                     $('#' + elemId).remove();
@@ -90,10 +94,10 @@ function addPersonnelToLists(incident) {
                 liElem = document.createElement('li');
                 listId = '#active911\\:response-type\\:' + vocabulary.id();
 
-                $(liElem).attr('id', 'device-' + device.id)
+                $(liElem).attr('id', 'device-' + device.id())
                     .addClass('list-group-item')
                     .addClass('device')
-                    .html('<h4>' + device.name + '</h4>');
+                    .html('<h4>' + device.name() + '</h4>');
                 vocabulary.hasRespondingPersonnel(true);
 
                 $(listId).find('.card-body .personnel').append(liElem);
@@ -109,8 +113,9 @@ function clearActiveAlert() {
 }
 
 function clearPersonnelMarker(device) {
-    if (typeof device.mapMarker === "google.maps.Marker") {
+    if (typeof device.mapMarker === "object" && device.mapMarker.__proto__ === google.maps.Marker.prototype) {
         device.mapMarker.setMap(null);
+        console.log(device.mapMarker);
     }
 }
 
@@ -191,16 +196,16 @@ function showActiveAlert() {
 function showPersonnelMarkers(incident) {
     let visibleDevices = [];
     for (let n=0; n < active911.devices.length; n++) {
-        let device = active911.getDevice(active911.devices[i].device.id);
-        if (typeof device.mapMarker === "object" && device.mapMarker instanceof google.maps.Marker) {
-            visibleDevices.push(device.id);
+        let device = active911.getDevice(active911.devices[i].id());
+        if (typeof device.mapMarker === "object" && device.mapMarker.__proto__ === google.maps.Marker.prototype) {
+            visibleDevices.push(device.id());
         }
     }
 
     for (let i=0; i < incident.responses.length; i++) {
         let device = active911.getDevice(incident.responses[i].device.id),
             visibleResponseType;
-        if (typeof device !== "undefined" && typeof device.id !== "undefined") {
+        if (typeof device !== "undefined" && typeof device.id === "function") {
             visibleResponseType = ko.unwrap(
                 active911SettingsModel.active911.responseVocabulary.vocabularyExists(
                     incident.responses[i].response,
@@ -214,7 +219,7 @@ function showPersonnelMarkers(incident) {
                 )
                 || visibleResponseType === true
             ) {
-                let existingIndex = visibleDevices.indexOf(device.id);
+                let existingIndex = visibleDevices.indexOf(device.id());
                 if (existingIndex >= 0) {
                     visibleDevices = visibleDevices.slice(existingIndex);
                 }
@@ -297,26 +302,29 @@ function updateGoogleRoute(incident) {
 }
 
 function updatePersonnelMarker(device, response) {
-    active911.cacheDevice(device.id).then(() => {
-        let deviceContent = '<h4 class="text-center">' + device.name + '</h4>'
+    active911.cacheDevice(device.id()).then(() => {
+        let deviceContent = '<h4 class="text-center">' + device.name() + '</h4>'
                 + '<p class="text-center"><small>'
                 + active911SettingsModel.active911.responseVocabulary.retrieve(response.response, 'term').label()
                 + '</small></p>';
 
-        if (typeof device.mapMarker !== "undefined" && device.mapMarker instanceof google.maps.Marker) {
+        if (typeof device.mapMarker !== "undefined" && device.mapMarker.__proto__ === google.maps.Marker.prototype) {
+            console.log('Map Marker already defined, updating...');
             device.mapMarker.setMap(active911Map.googleMap);
             device.mapMarker.setOptions({
-                position: {lat: device.latitude, lng: device.longitude }
+                position: { lat: device.latitude(), lng: device.longitude() }
             });
         } else {
+            console.log('Map Marker was not defined or not an instance of google.maps.Marker');
             device.mapMarker = new google.maps.Marker({
                 map: active911Map.googleMap,
                 icon: {url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-personnel.png"},
-                position: new google.maps.LatLng({lat: device.latitude, lng: device.longitude})
+                position: new google.maps.LatLng({ lat: device.latitude(), lng: device.longitude() })
             });
         }
 
-        if (typeof device.mapMarkerInfo === "undefined" || !(device.mapMarkerInfo instanceof google.maps.InfoWindow)) {
+        if (typeof device.mapMarkerInfo === "undefined" || device.mapMarkerInfo.__proto__ !== google.maps.InfoWindow.prototype) {
+            console.log('Marker Info Window not found, creating a new one...');
             device.mapMarkerInfo = new google.maps.InfoWindow({
                 disableAutoPan: active911SettingsModel.panToShowAllMarkers(),
                 content: deviceContent
@@ -326,6 +334,7 @@ function updatePersonnelMarker(device, response) {
             device.mapMarkerInfo.close();
             device.mapMarkerInfo.setContent(deviceContent);
         }
+        console.log('Placing map marker info window');
         device.mapMarkerInfo.open(active911Map.googleMap, device.mapMarker);
     }).catch((err) => {
         console.error(err);

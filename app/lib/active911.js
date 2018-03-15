@@ -8,6 +8,7 @@ module.exports = function (active911Settings) {
     const os = require('os');
     const queryString = require('querystring');
     const requestPromise = require('request-promise');
+    const ko = require('knockout');
 
     let credentials = {
             client: {
@@ -33,6 +34,19 @@ module.exports = function (active911Settings) {
         this.devices = {};
     };
 
+    Active911.Device = function (config) {
+        if (typeof config === "undefined") {
+            config = {};
+        }
+
+        this.id = ko.observable(config.id || null);
+        this.name = ko.observable(config.name || null);
+        this.latitude = ko.observable(config.latitude || null);
+        this.longitude = ko.observable(config.longitude || null);
+        this.position_accuracy = ko.observable(config.position_accuracy || null);
+        this.position_timestamp = ko.observable(config.position_timestamp || null);
+    };
+
     util.inherits(Active911, EventEmitter);
 
     Active911.prototype.agency = {};
@@ -45,20 +59,34 @@ module.exports = function (active911Settings) {
         let self = this;
 
         return this.callApi()
+            .catch((err) => {
+                console.error(err);
+            })
             .then((json) => {
                 self.agency = json.agency;
             });
     };
 
     Active911.prototype.cacheDevice = function (deviceId) {
-        let self = this;
+        let deviceKeys = ['id', 'name', 'latitude', 'longitude', 'position_accuracy', 'position_timestamp'],
+            i = 0,
+            self = this;
 
         return this.callApi('devices/' + deviceId)
+            .catch((err) => {
+                console.error(err);
+            })
             .then((json) => {
                 json.device.latitude = parseFloat(json.device.latitude);
                 json.device.longitude = parseFloat(json.device.longitude);
 
-                self.devices[json.device.id] = json.device;
+                if (typeof self.devices[json.device.id] === 'undefined') {
+                    self.devices[json.device.id] = new Active911.Device(json.device);
+                }
+
+                for (i = 0; i < deviceKeys.length; i++) {
+                    self.devices[json.device.id][deviceKeys[i]](json.device[deviceKeys[i]]);
+                }
             });
     };
 
@@ -66,6 +94,9 @@ module.exports = function (active911Settings) {
         let self = this;
 
         return this.cacheAgency()
+            .catch((err) => {
+                console.error(err);
+            })
             .then(() => {
                 let device;
                 for (let i=0; i<self.agency.devices.length; i++) {
@@ -256,18 +287,24 @@ module.exports = function (active911Settings) {
     };
 
     Active911.prototype.startup = function () {
+        let that = this;
         this.cacheDevices()
             .then(() => {
                 ipcMain.emit('active911-agency-updated');
                 ipcMain.emit('active911-ready');
 
-                this.updateAlerts();
-
-                // Get alerts every 30-seconds
-                this.alertUpdater = setInterval((() => { this.updateAlerts(); }).bind(this), 30 * 1000);
-                this.updateDevicesEvery(30);
-                // Cache device data every 2 minutes
-                this.updateDevicesEvery(2 * 60);
+                that.updateAlerts()
+                    .catch((err) => {
+                        console.error(err);
+                    })
+                    .then(() => {
+                    // Get alerts every 30-seconds
+                    that.alertUpdater = setInterval((() => {
+                        this.updateAlerts();
+                    }).bind(this), 30 * 1000);
+                    // Cache device data every 2 minutes
+                    that.updateDevicesEvery(2 * 60);
+                });
             })
             .catch((err) => {
                 console.error(err.message, err);
@@ -294,6 +331,11 @@ module.exports = function (active911Settings) {
         }
     };
 
+    Active911.prototype.stopUpdatingAlerts = function () {
+        clearInterval(this.alertUpdater);
+        this.alertUpdater = null;
+    };
+
     Active911.prototype.stopUpdatingDevices = function () {
         clearTimeout(this.deviceUpdater);
         this.deviceUpdater = null;
@@ -302,7 +344,7 @@ module.exports = function (active911Settings) {
     Active911.prototype.updateAlerts = function () {
         let that = this;
         that.emit('updating-alerts-start');
-        that.getAlerts()
+        return that.getAlerts()
             .then((response) => {
                 let alerts = response.alerts,
                     promises = [];
