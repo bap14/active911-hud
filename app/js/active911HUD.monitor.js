@@ -3,7 +3,7 @@
 const app = require('electron');
 const path = require('path');
 
-let active911Map, active911ResponseVocabularyModel, active911SettingsModel;
+let active911Map, active911ResponseVocabularyModel, active911SettingsModel, mapMarkers = {}, mapInfoWindows = {};
 
 $('#active911\\:exit').on('click', (e) => {
     e.stopPropagation();
@@ -308,34 +308,34 @@ function updatePersonnelMarker(device, response) {
                 + active911SettingsModel.active911.responseVocabulary.retrieve(response.response, 'term').label()
                 + '</small></p>';
 
-        if (typeof device.mapMarker !== "undefined" && device.mapMarker.__proto__ === google.maps.Marker.prototype) {
-            console.log('Map Marker already defined, updating...');
-            device.mapMarker.setMap(active911Map.googleMap);
-            device.mapMarker.setOptions({
-                position: { lat: device.latitude(), lng: device.longitude() }
-            });
-        } else {
-            console.log('Map Marker was not defined or not an instance of google.maps.Marker');
-            device.mapMarker = new google.maps.Marker({
+        if (
+            !mapMarkers.hasOwnProperty(device.id()) ||
+            mapMarkers[device.id()].__proto__ !== google.maps.Marker.prototype
+        ) {
+            mapMarkers[device.id()] = new google.maps.Marker({
                 map: active911Map.googleMap,
                 icon: {url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-personnel.png"},
                 position: new google.maps.LatLng({ lat: device.latitude(), lng: device.longitude() })
             });
+        } else {
+            mapMarkers[device.id()].setMap(active911Map.googleMap);
+            mapMarkers[device.id()].setOptions({
+                position: { lat: device.latitude(), lng: device.longitude() }
+            });
         }
 
-        if (typeof device.mapMarkerInfo === "undefined" || device.mapMarkerInfo.__proto__ !== google.maps.InfoWindow.prototype) {
-            console.log('Marker Info Window not found, creating a new one...');
-            device.mapMarkerInfo = new google.maps.InfoWindow({
+        if (
+            !mapInfoWindows.hasOwnProperty(device.id()) ||
+            mapInfoWindows[device.id()].__proto__ !== google.maps.InfoWindow.prototype
+        ) {
+            mapInfoWindows[device.id()] = new google.maps.InfoWindow({
                 disableAutoPan: active911SettingsModel.panToShowAllMarkers(),
                 content: deviceContent
             });
         } else {
-            console.log('Closing map marker info window');
-            device.mapMarkerInfo.close();
-            device.mapMarkerInfo.setContent(deviceContent);
+            mapInfoWindows[device.id()].setContent(deviceContent);
         }
-        console.log('Placing map marker info window');
-        device.mapMarkerInfo.open(active911Map.googleMap, device.mapMarker);
+        mapInfoWindows[device.id()].open(active911Map.googleMap, mapMarkers[device.id()]);
     }).catch((err) => {
         console.error(err);
     });

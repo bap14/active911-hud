@@ -108,8 +108,10 @@ var Active911HUDMap;
         },
 
         updateHomeMarker: function (config) {
-            this.homeMarker.setMap(this.googleMap);
-            this.homeMarker.setOptions(config);
+            if (this.homeMarker) {
+                this.homeMarker.setMap(this.googleMap);
+                this.homeMarker.setOptions(config);
+            }
         },
 
         updateOptions: function (options) {

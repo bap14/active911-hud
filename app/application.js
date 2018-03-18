@@ -56,7 +56,7 @@ function createHUDWindow() {
     hudWindow.hide();
     hudWindow.loadURL('file://' + __dirname + '/views/monitor.html');
     hudWindow.webContents.on('did-finish-load', () => {
-        splashScreen.send('main-window-ready');
+        //splashScreen.send('main-window-ready');
     });
     hudWindow.on('closed', () => hudWindow = null);
 
@@ -227,6 +227,9 @@ ipcMain.on('login-failure', (evt, message) => {
 });
 ipcMain.on('console.log', (evt, message) => {
     console.log(message);
+});
+ipcMain.on('active911-ready', () => {
+    splashScreen.send('main-window-ready');
 });
 ipcMain.on('active911-agency-updated', () => {
     hudWindow.send('agency-updated');

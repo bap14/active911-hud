@@ -80,13 +80,15 @@ module.exports = function (active911Settings) {
                 json.device.latitude = parseFloat(json.device.latitude);
                 json.device.longitude = parseFloat(json.device.longitude);
 
-                if (typeof self.devices[json.device.id] === 'undefined') {
+                if (typeof self.devices[json.device.id] === "undefined") {
                     self.devices[json.device.id] = new Active911.Device(json.device);
                 }
 
                 for (i = 0; i < deviceKeys.length; i++) {
                     self.devices[json.device.id][deviceKeys[i]](json.device[deviceKeys[i]]);
                 }
+
+                return self.devices[json.device.id];
             });
     };
 
@@ -291,20 +293,20 @@ module.exports = function (active911Settings) {
         this.cacheDevices()
             .then(() => {
                 ipcMain.emit('active911-agency-updated');
-                ipcMain.emit('active911-ready');
 
                 that.updateAlerts()
                     .catch((err) => {
                         console.error(err);
                     })
                     .then(() => {
-                    // Get alerts every 30-seconds
-                    that.alertUpdater = setInterval((() => {
-                        this.updateAlerts();
-                    }).bind(this), 30 * 1000);
-                    // Cache device data every 2 minutes
-                    that.updateDevicesEvery(2 * 60);
-                });
+                        ipcMain.emit('active911-ready');
+                        // Get alerts every 30-seconds
+                        that.alertUpdater = setInterval((() => {
+                            this.updateAlerts();
+                        }).bind(this), 30 * 1000);
+                        // Cache device data every 2 minutes
+                        that.updateDevicesEvery(2 * 60);
+                    });
             })
             .catch((err) => {
                 console.error(err.message, err);
