@@ -52,6 +52,7 @@ module.exports = function (active911Settings) {
     Active911.prototype.agency = {};
     Active911.prototype.devices = {};
     Active911.prototype.alerts = [];
+    Active911.prototype.alreadyAlerted = [];
     Active911.prototype.alertUpdater = false;
     Active911.prototype.deviceUpdater = false;
 
@@ -237,7 +238,8 @@ module.exports = function (active911Settings) {
 
                 isNewActiveAlert = (
                     (that.activeAlert === null || alert.id !== that.activeAlertId)
-                    //&& (new Date().getTime()) - active911Settings.get('active911.alerts.activeAlertAge') < alert.received.getTime()
+                    && !that.alreadyAlerted.includes(alert.id)
+                    // && (new Date().getTime()) - active911Settings.get('active911.alerts.activeAlertAge') < alert.received.getTime()
                 );
                 if (isNewActiveAlert) {
                     /* Test for intersection routing: */
@@ -246,8 +248,9 @@ module.exports = function (active911Settings) {
                     /* Test for mutual aid routing */
                     // active911.activeAlert = {"id":"117032679","received":"2018-02-25T18:24:30.000Z","sent":"2018-02-25T18:24:34.000Z","priority":"3","description":"MUTUAL AID ALARM","details":"","external_data":"","place":"BOX 1741 3814 JIM SMITH LN","address":"FC","unit":"","cross_street":"","city":"Westminster","state":"MD","latitude":"39.56945080","longitude":"-76.99037800","source":"","units":"M149","cad_code":"18003525","map_code":"FC00","agency":{"id":"22844","uri":"https://access.active911.com/interface/open_api/api/agencies/22844"},"pagegroups":[{"title":"EMS: M149 FR14 I149 A149 U14 U14-1","prefix":"BH"}],"responses":[{"response":"watch","timestamp":"2018-02-25 18:24:33","device":{"id":"506098","uri":"https://access.active911.com/interface/open_api/api/devices/506098"}},{"response":"watch","timestamp":"2018-02-25 18:24:39","device":{"id":"506109","uri":"https://access.active911.com/interface/open_api/api/devices/506109"}},{"response":"watch","timestamp":"2018-02-25 18:24:39","device":{"id":"419626","uri":"https://access.active911.com/interface/open_api/api/devices/419626"}},{"response":"watch","timestamp":"2018-02-25 18:24:45","device":{"id":"509639","uri":"https://access.active911.com/interface/open_api/api/devices/509639"}},{"response":"watch","timestamp":"2018-02-25 18:24:48","device":{"id":"520295","uri":"https://access.active911.com/interface/open_api/api/devices/520295"}},{"response":"watch","timestamp":"2018-02-25 18:24:55","device":{"id":"507410","uri":"https://access.active911.com/interface/open_api/api/devices/507410"}},{"response":"watch","timestamp":"2018-02-25 18:25:10","device":{"id":"419052","uri":"https://access.active911.com/interface/open_api/api/devices/419052"}},{"response":"watch","timestamp":"2018-02-25 18:25:13","device":{"id":"486462","uri":"https://access.active911.com/interface/open_api/api/devices/486462"}},{"response":"watch","timestamp":"2018-02-25 18:25:26","device":{"id":"508563","uri":"https://access.active911.com/interface/open_api/api/devices/508563"}},{"response":"watch","timestamp":"2018-02-25 18:25:45","device":{"id":"412607","uri":"https://access.active911.com/interface/open_api/api/devices/412607"}},{"response":"watch","timestamp":"2018-02-25 18:27:46","device":{"id":"508602","uri":"https://access.active911.com/interface/open_api/api/devices/508602"}},{"response":"watch","timestamp":"2018-02-25 18:27:56","device":{"id":"514670","uri":"https://access.active911.com/interface/open_api/api/devices/514670"}},{"response":"watch","timestamp":"2018-02-25 18:58:38","device":{"id":"157251","uri":"https://access.active911.com/interface/open_api/api/devices/157251"}}]}
 
-                    that.activeAlert = 0;
+                    that.activeAlert = 0; // Index of alert in that.alerts array
                     that.activeAlertId = alert.id;
+                    that.alreadyAlerted.push(alert.id);
                 }
 
                 /* Fix for multiple responses */
@@ -327,9 +330,10 @@ module.exports = function (active911Settings) {
     Active911.prototype.stopActiveAlertTimer = function () {
         this.updateDevicesEvery(2 * 60);
         if (this.activeAlertTimer !== null) {
-            this.emit('active-alert-timer-stop');
+            this.activeAlert = null;
             clearTimeout(this.activeAlertTimer);
             this.activeAlertTimer = null;
+            this.emit('active-alert-timer-stop');
         }
     };
 

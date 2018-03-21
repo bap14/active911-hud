@@ -7,11 +7,7 @@ var Active911HUDMap;
         this.mapOptions = $.extend(this.mapOptions, mapOptions || {});
         this.alertSettings = $.extend({}, alertSettings || {});
 
-        let script = document.createElement('script');
-        script.src = "https://maps.googleapis.com/maps/api/js?callback=" + callback + "&key=" + apiKey;
-        script.async = true;
-        script.defer = true;
-        document.getElementsByTagName('body')[0].appendChild(script);
+        this.addGoogleMapsApi(apiKey, callback);
     };
 
     Active911HUDMap.prototype = {
@@ -26,8 +22,24 @@ var Active911HUDMap;
             zoom: 12
         },
 
+        addGoogleMapsApi: function (apiKey, callback) {
+            if ($('#google-maps-api-src')) {
+                $('#google-maps-api-src').remove();
+            }
+
+            let script = document.createElement('script');
+            script.src = "https://maps.googleapis.com/maps/api/js?key=" + apiKey;
+            if (callback) {
+                script.src += "&callback=" + callback
+            }
+            script.id = 'google-maps-api-src';
+            script.async = true;
+            script.defer = true;
+            document.getElementsByTagName('body')[0].appendChild(script);
+        },
+
         clearHomeMarker: function () {
-            if (this.homeMarker instanceof google.maps.Marker) {
+            if (this.homeMarker.__proto__ === google.maps.Marker.prototype) {
                 this.homeMarker.setMap(null);
             }
             return this;
@@ -36,11 +48,7 @@ var Active911HUDMap;
         clearRoute: function () {
             this.directionsRenderer.setDirections({routes: []});
             this.googleMap.setOptions(this.mapOptions);
-            this.updateHomeMarker({
-                lat: this.active911.getAgency().latitude,
-                lng: this.active911.getAgency().longitude,
-                visible: false
-            });
+            this.showHomeMarker();
         },
 
         drawRoute: function (destination) {
@@ -48,7 +56,7 @@ var Active911HUDMap;
                 throw "Expecting LatLng or LatLngLiteral object";
             }
 
-            if (!(destination instanceof google.maps.LatLng)) {
+            if (!(destination.__proto__ === google.maps.LatLng.prototype)) {
                 if (!destination.lat || !destination.lng) {
                     throw "Destination object missing 'lat' or 'lng' definition";
                 }
@@ -101,16 +109,40 @@ var Active911HUDMap;
 
             this.homeMarker = new google.maps.Marker({
                 position: this.mapOptions.center,
-                map: this.googleMap
+                map: this.googleMap,
+                icon: {
+                    url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-home.png"
+                }
             });
 
             this.active911.on('active-alert-timer-stop', this.clearRoute.bind(this));
         },
 
-        updateHomeMarker: function (config) {
-            if (this.homeMarker) {
+        showHomeMarker: function () {
+            if (typeof this.homeMarker !== "undefined" && this.homeMarker.__proto__ === google.maps.Marker.prototype) {
+                this.homeMarker.setVisible(true);
                 this.homeMarker.setMap(this.googleMap);
-                this.homeMarker.setOptions(config);
+            }
+        },
+
+        updateHomeMarker: function (config, showMarker) {
+            if (typeof showMarker === "undefined") {
+                showMarker = false;
+            }
+
+            if (typeof config === "object") {
+                if (config.hasOwnProperty('lat') && config.hasOwnProperty('lng')) {
+                    console.log('Updating position: ' + config.lat + ', ' + config.lng);
+                    this.homeMarker.setPosition(new google.maps.LatLng(config.lat, config.lng));
+                }
+
+                if (config.hasOwnProperty('visible')) {
+                    this.homeMarker.setVisible(config.visible);
+                }
+            }
+
+            if (showMarker) {
+                this.showHomeMarker();
             }
         },
 

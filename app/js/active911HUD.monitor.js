@@ -107,21 +107,27 @@ function addPersonnelToLists(incident) {
 }
 
 function clearActiveAlert() {
+    clearPersonnelMarkers();
     $('#active911-hud > .navbar.sticky-top').removeClass('bg-active-alert');
     $('#active911\\:active-alert-container').hide();
     $('#active911\\:active-alert-container').html('');
+    updateGoogleRoute(null);
 }
 
-function clearPersonnelMarker(device) {
-    if (typeof device.mapMarker === "object" && device.mapMarker.__proto__ === google.maps.Marker.prototype) {
-        device.mapMarker.setMap(null);
-        console.log(device.mapMarker);
+function clearPersonnelMarker(deviceId) {
+    if (mapInfoWindows.hasOwnProperty(deviceId)) {
+        mapInfoWindows[deviceId].close();
+    }
+
+    if (mapMarkers.hasOwnProperty(deviceId)) {
+        mapMarkers[deviceId].setMap(null);
     }
 }
 
 function clearPersonnelMarkers() {
-    for (i=0; i < active911.devices.length; i++) {
-        clearPersonnelMarker(active911.devices[i]);
+    for (let deviceId in mapMarkers) {
+        if (!mapMarkers.hasOwnProperty(deviceId)) continue;
+        clearPersonnelMarker(deviceId);
     }
 }
 
@@ -202,28 +208,30 @@ function showPersonnelMarkers(incident) {
         }
     }
 
-    for (let i=0; i < incident.responses.length; i++) {
-        let device = active911.getDevice(incident.responses[i].device.id),
-            visibleResponseType;
-        if (typeof device !== "undefined" && typeof device.id === "function") {
-            visibleResponseType = ko.unwrap(
-                active911SettingsModel.active911.responseVocabulary.vocabularyExists(
-                    incident.responses[i].response,
-                    'term'
-                )
-            );
-            if (
-                (
-                    incident.responses[i].response.toLowerCase() === "watch" &&
-                    ko.unwrap(active911SettingsModel.active911.showWatchers) === true
-                )
-                || visibleResponseType === true
-            ) {
-                let existingIndex = visibleDevices.indexOf(device.id());
-                if (existingIndex >= 0) {
-                    visibleDevices = visibleDevices.slice(existingIndex);
+    if (typeof incident.responses !== "undefined") {
+        for (let i = 0; i < incident.responses.length; i++) {
+            let device = active911.getDevice(incident.responses[i].device.id),
+                visibleResponseType;
+            if (typeof device !== "undefined" && typeof device.id === "function") {
+                visibleResponseType = ko.unwrap(
+                    active911SettingsModel.active911.responseVocabulary.vocabularyExists(
+                        incident.responses[i].response,
+                        'term'
+                    )
+                );
+                if (
+                    (
+                        incident.responses[i].response.toLowerCase() === "watch" &&
+                        ko.unwrap(active911SettingsModel.active911.showWatchers) === true
+                    )
+                    || visibleResponseType === true
+                ) {
+                    let existingIndex = visibleDevices.indexOf(device.id());
+                    if (existingIndex >= 0) {
+                        visibleDevices = visibleDevices.slice(existingIndex);
+                    }
+                    updatePersonnelMarker(device, incident.responses[i]);
                 }
-                updatePersonnelMarker(device, incident.responses[i]);
             }
         }
     }
@@ -274,11 +282,7 @@ function updateAlert(data) {
 
 function updateGoogleRoute(incident) {
     if (typeof incident === "undefined" || incident === null) {
-        active911Map.updateHomeMarker({
-            lat: active911.getAgency().latitude,
-            lng: active911.getAgency().longitude,
-            visible: true
-        });
+        active911Map.showHomeMarker();
 
         clearPersonnelMarkers();
     }
@@ -329,7 +333,7 @@ function updatePersonnelMarker(device, response) {
             mapInfoWindows[device.id()].__proto__ !== google.maps.InfoWindow.prototype
         ) {
             mapInfoWindows[device.id()] = new google.maps.InfoWindow({
-                disableAutoPan: active911SettingsModel.panToShowAllMarkers(),
+                disableAutoPan: !active911SettingsModel.panToShowAllMarkers(),
                 content: deviceContent
             });
         } else {
@@ -453,8 +457,7 @@ ipcRenderer.on('agency-updated', () => {
     active911Map.updateHomeMarker({
         lat: active911.getAgency().latitude,
         lng: active911.getAgency().longitude,
-        visible: true
-    });
+    }, true);
 });
 
 $(document).ready(() => {
