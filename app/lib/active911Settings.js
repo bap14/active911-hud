@@ -50,6 +50,10 @@ module.exports = function () {
                     lat: 38.89768,
                     lng: -77.038671
                 },
+                home: {
+                    lat: 38.89768,
+                    lng: -77.038671
+                },
                 mapTypeId: 'roadmap',
                 zoom: 12,
             },

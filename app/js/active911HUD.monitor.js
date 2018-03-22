@@ -44,6 +44,21 @@ $('#active911\\:google-maps\\:lookup-location').on('click', (e) => {
     });
     return false;
 });
+$('#active911\\:google-maps\\:lookup-home-location').on('click', (e) => {
+    e.stopPropagation();
+    $('#active911\\:geocoding-home').show();
+    active911Map.geocoder.geocode({ address: $('#active911\\:googleMaps\\:home-marker').val() }, (results, status) => {
+        if (status === 'OK') {
+            active911SettingsModel.googleMaps.home.lat(results[0].geometry.location.lat());
+            active911SettingsModel.googleMaps.home.lng(results[0].geometry.location.lng());
+            $('#active911\\:geocoding-home').hide();
+        }
+        else {
+            alert('Failed to geocode address: ' + status);
+        }
+    });
+    return false;
+});
 $('#active911\\:settings-save').on('click', saveSettings);
 $('#active911\\:save-settings').on('click', saveSettings);
 
@@ -455,8 +470,8 @@ ipcRenderer.on('agency-updated', () => {
     $('#active911\\:agency').html(active911.getAgency().name);
 
     active911Map.updateHomeMarker({
-        lat: active911.getAgency().latitude,
-        lng: active911.getAgency().longitude,
+        lat: active911Settings.get('googleMaps.home.lat'),
+        lng: active911Settings.get('googleMaps.home.lng')
     }, true);
 });
 

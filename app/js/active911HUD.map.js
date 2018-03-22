@@ -108,7 +108,7 @@ var Active911HUDMap;
             this.directionsRenderer.setMap(this.googleMap);
 
             this.homeMarker = new google.maps.Marker({
-                position: this.mapOptions.center,
+                position: this.mapOptions.home,
                 map: this.googleMap,
                 icon: {
                     url: path.dirname(path.dirname(require.main.filename)) + "/images/marker-home.png"
