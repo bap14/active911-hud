@@ -14,11 +14,8 @@ gulp.task('prepare', () => {
         .pipe(gulp.dest('app/styles'));
 
     gulp.src([
-        'bower_components/bootstrap/dist/css/bootstrap.min.css' // ,
-        // 'bower_components/bootstrap/dist/css/bootstrap-theme.min.css'
+        'bower_components/bootstrap/dist/css/bootstrap.min.css'
     ]).pipe(gulp.dest('app/styles'));
-
-    // gulp.src('bower_components/bootstrap/dist/fonts/*').pipe(gulp.dest('app/fonts'));
 
     gulp.src([
         'bower_components/jquery/dist/jquery.min.js',
@@ -27,7 +24,7 @@ gulp.task('prepare', () => {
         'bower_components/bootstrap/dist/js/bootstrap.min.js'
     ]).pipe(gulp.dest('app/js'));
 
-    gulp.src('build/icons/*').pipe(gulp.dest('app/images/icons'));
+    gulp.src('build/icons/**/*').pipe(gulp.dest('app/images/icons'));
 });
 
 gulp.task('start', ['prepare'], () => {

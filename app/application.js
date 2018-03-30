@@ -21,8 +21,10 @@ let settingsWindow,
     appIcon = path.join(__dirname, "images", "icons"),
     tokenRefreshInterval;
 
-if (os.platform().toLowerCase() === "darwin") {
-    iconName = "active911.icns";
+if (os.platform().toLowerCase() === "win32") {
+    iconName = path.join("win", "active911.ico");
+} else {
+    iconName = path.join("png", "512x512.png");
 }
 appIcon = path.join(appIcon, iconName);
 

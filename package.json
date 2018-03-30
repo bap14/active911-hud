@@ -12,15 +12,15 @@
     "copyright": "Copyright © 2018 ${author}",
     "win": {
       "target": "nsis",
-      "icon": "build/icons/active911.ico"
+      "icon": "build/icons/win/active911.ico"
     },
     "nsis": {
-      "installerIcon": "build/icons/active911.ico",
-      "uninstallerIcon": "build/icons/active911.ico"
+      "installerIcon": "build/icons/win/active911.ico",
+      "uninstallerIcon": "build/icons/win/active911.ico"
     },
     "mac": {
       "target": "dmg",
-      "icon": "build/icons/active911.icns"
+      "icon": "build/icons/mac/active911.icns"
     },
     "dmg": {
       "background": "",

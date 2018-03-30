@@ -166,6 +166,21 @@ function initGoogleMap() {
     return retval;
 }
 
+function removeAgedAlerts() {
+    $('#active911\\:alert-list [role="alert"]').each((idx, elem) => {
+        let result = active911.alerts.find((alert) => {
+            if (alert.id === elem.data('alertId')) {
+                return true;
+            }
+            return false;
+        });
+
+        if (typeof result === "undefined") {
+            $(elem).remove();
+        }
+    });
+}
+
 function saveSettings(e) {
     e.stopPropagation();
     writeSettings();
@@ -273,6 +288,7 @@ function updateAlert(data) {
         existing = false;
         alert = template;
         alert.attr('id', 'alert-' + data.id);
+        alert.attr('data-alert-id', data.id);
     }
 
     $('.alert-title > .number', alert).text(data.cad_code);
@@ -460,6 +476,7 @@ active911.on('alerts-updated', () => {
         showPersonnelMarkers(active911.getActiveAlert());
         addPersonnelToLists(active911.getActiveAlert());
     }
+    removeAgedAlerts();
 });
 
 ipcRenderer.on('oauth-update-complete', () => {

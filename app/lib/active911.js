@@ -170,6 +170,13 @@ module.exports = function (active911Settings) {
         }
     };
 
+    Active911.prototype.getActiveAlert = function () {
+        if (this.activeAlert !== null) {
+            return this.alerts[this.activeAlert];
+        }
+        return false;
+    };
+
     Active911.prototype.getAgency = function () {
         return this.agency;
     };
@@ -223,12 +230,29 @@ module.exports = function (active911Settings) {
         });
     };
 
-    Active911.prototype.getActiveAlert = function () {
-        if (this.activeAlert !== null) {
-            return this.alerts[this.activeAlert];
-        }
-        return false;
-    }
+    Active911.prototype.removeAgedAlerts = function () {
+        let that = this;
+        return new Promise((resolve, reject) => {
+            let alert, n = 0, alertAge = 0;
+
+            for (n; n < that.alerts.length; n++) {
+                alert = that.alerts[n];
+
+                alertAge = Math.round(((new Date().getTime() - alert.received.getTime()) / 1000) / 60);
+                console.log(alert.id + ' :: ' + alertAge);
+
+                if (alertAge >= active911Settings.get('active911.alerts.clearAfter')) {
+                    let index = that.alerts.indexOf(alert);
+                    console.log('Removing index: ' + index);
+                    if (index > -1) {
+                        that.alerts = that.alerts.splice(index, 1);
+                    }
+                }
+            }
+
+            resolve();
+        });
+    };
 
     Active911.prototype.setActiveAlert = function () {
         let that = this;
@@ -238,8 +262,8 @@ module.exports = function (active911Settings) {
 
                 isNewActiveAlert = (
                     (that.activeAlert === null || alert.id !== that.activeAlertId)
-                    && !that.alreadyAlerted.includes(alert.id)
-                    // && (new Date().getTime()) - active911Settings.get('active911.alerts.activeAlertAge') < alert.received.getTime()
+                    // && !that.alreadyAlerted.includes(alert.id)
+                    && (new Date().getTime()) - (active911Settings.get('active911.alerts.activeAlertAge') * 60 * 60 *1000) < alert.received.getTime()
                 );
                 if (isNewActiveAlert) {
                     /* Test for intersection routing: */
@@ -375,12 +399,16 @@ module.exports = function (active911Settings) {
                             if (a.received.getTime() === b.received.getTime()) return 0;
                             return (a.received.getTime() > b.received.getTime()) ? -1 : 1;
                         });
-                        that.setActiveAlert()
+                        that.removeAgedAlerts()
+                            .catch((e) => { console.error(e); })
                             .then(() => {
-                                that.emit('alerts-updated');
-                                ipcMain.emit('active911-alerts-updated');
-                            })
-                            .catch((e) => { console.error(e); });
+                                that.setActiveAlert()
+                                    .catch((e) => { console.error(e); })
+                                    .then(() => {
+                                        that.emit('alerts-updated');
+                                        ipcMain.emit('active911-alerts-updated');
+                                    });
+                            });
                     })
                     .catch((e) => { console.error(e); })
                     .then(() => {
