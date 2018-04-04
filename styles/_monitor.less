@@ -261,59 +261,43 @@ body#active911-hud {
 
   #active911\:updating-alerts {
     .spinner {
-      font-size: 16px;
-      color: #005cbf;
-
-      border-color: #005cbf #005cbf transparent transparent;
-      border-radius: 0 4em 0 0;
-      border-style: solid;
-      border-width: 0.3em 0.3em 0 0;
-
-      margin-right: 1.2em;
-      margin-top: 0.3em;
-      padding: 0.3em 0.3em 0 0;
-
       display: inline-block;
+      margin: -12px 8px -8px 8px;
+      overflow: hidden;
       position: relative;
+      vertical-align: middle;
 
-      height: 12px;
-      width: 12px;
+      height: 34px;
+      width: 68px;
 
-      animation: middleSignal 2s linear infinite;
-    }
+      &:before {
+        content: '';
 
-    .spinner:before {
-      content: "●";
-      display: inline-block;
+        bottom: 0;
+        left: 2px;
+        position: absolute;
+        right: 2px;
+        top: 16px;
 
-      left: -0.45em;
-      position: absolute;
-      top: -0.17em;
+        height: 3px;
 
-      height: 0.5em;
-      width: 0.5em;
+        z-index: -1;
+      }
 
-      animation: dotSignal 2s linear infinite;
-    }
+      &:after {
+        content: '';
 
-    .spinner:after {
-      content: ".";
-      color: transparent;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 32" xml:space="preserve"><polyline stroke-width="3px" stroke="white" points="0,19.8 16.5,19.8 19.1,13.5 21.6,19.8 26,19.8 28,23.6 32.5,1.8 36.3,29.7 38.7,19.8 44.3,19.8 48.2,17.8 52.2,19.8 64,19.8 "/></svg>') 0 0 no-repeat;
 
-      display: inline-block;
-      left: 0;
-      position: absolute;
-      top: -1em;
+        display: block;
+        position: absolute;
+        animation: 1.5s cardio linear infinite;
 
-      border-color: #005cbf #005cbf transparent transparent;
-      border-radius: 0 4em 0 0;
-      border-style: solid;
-      border-width: 0.3em 0.3em 0 0;
+        height: 100%;
+        width: 100%;
 
-      height: 1.4em;
-      width: 1.5em;
-
-      animation: endSignal 2s linear infinite;
+        clip: rect(0, 0, 32px, 0);
+      }
     }
   }
 
@@ -335,27 +319,21 @@ body#active911-hud {
   1000% { background-position: 0% 50% }
 }
 
-@keyframes dotSignal {
-  0% { color: #00147F; }
-  18% { color: #049EFF; }
-  52% { color: #049EFF; }
-  72% { color: #00147F; }
-  100% { color: #00147F; }
-}
-
-@keyframes middleSignal {
-  0% { border-color: #00147F; }
-  18% { border-color: #00147F; }
-  36% { border-color: #049EFF; }
-  70% { border-color: #049EFF; }
-  90% { border-color: #00147F; }
-  100% { border-color: #00147F; }
-}
-
-@keyframes endSignal {
-  0% { border-color: #00147F; }
-  36% { border-color: #00147F; }
-  54% { border-color: #049EFF; }
-  80% { border-color: #049EFF; }
-  100% { border-color: #00147F; }
+@keyframes cardio {
+  0% { clip: rect(0, 0, 32px, 0); opacity: 0.4; }
+  4% { clip: rect(0, 10.666667px, 32px, 0); opacity: 0.6; }
+  15% { clip: rect(0, 21.33344px, 32px, 0); opacity: 0.8; }
+  20% { clip: rect(0, 64px, 32px, 0); opacity: 1; }
+  30% { clip: rect(0, 64px 32px 0); opacity: 1; }
+  34% { clip: rect(0, 64px, 32px, 42.66656px); opacity: 0.8; }
+  45% { clip: rect(0, 64px, 32px, 53.33333px); opacity: 0.6; }
+  50% { clip: rect(0, 64px, 32px, 64px); opacity: 0.4; }
+  51% { clip: rect(0, 0, 32px, 0); opacity: 0.4; }
+  54% { clip: rect(0, 10.666667px, 32px, 0); opacity: 0.6; }
+  65% { clip: rect(0, 21.33344px, 32px, 0); opacity: 0.8; }
+  70% { clip: rect(0, 64px, 32px, 0); opacity: 1; }
+  80% { clip: rect(0, 64px 32px 0); opacity: 1; }
+  84% { clip: rect(0, 64px, 32px, 42.66656px); opacity: 0.8; }
+  95% { clip: rect(0, 64px, 32px, 53.33333px); opacity: 0.6; }
+  100% { clip: rect(0, 64px, 32px, 64px); opacity: 0.4; }
 }
