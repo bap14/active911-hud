@@ -193,6 +193,10 @@ module.exports = function (active911Settings) {
         return this.devices[deviceId];
     };
 
+    Active911.prototype.hasActiveAlert = function () {
+        return this.activeAlert !== null;
+    };
+
     Active911.prototype.parseURI = function (str, options) {
         let o = Object.assign({
                     strictMode: false,
@@ -239,11 +243,9 @@ module.exports = function (active911Settings) {
                 alert = that.alerts[n];
 
                 alertAge = Math.round(((new Date().getTime() - alert.received.getTime()) / 1000) / 60);
-                console.log(alert.id + ' :: ' + alertAge);
 
                 if (alertAge >= active911Settings.get('active911.alerts.clearAfter')) {
                     let index = that.alerts.indexOf(alert);
-                    console.log('Removing index: ' + index);
                     if (index > -1) {
                         that.alerts = that.alerts.splice(index, 1);
                     }

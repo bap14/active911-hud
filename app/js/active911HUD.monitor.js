@@ -184,7 +184,9 @@ function removeAgedAlerts() {
 function saveSettings(e) {
     e.stopPropagation();
     writeSettings();
-    active911Map.updateOptions(active911Settings.get('googleMaps'));
+    if (!active911.hasActiveAlert()) {
+        active911Map.updateOptions(active911Settings.get('googleMaps'));
+    }
     $('#active911\\:close-settings').click();
 }
 
