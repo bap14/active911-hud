@@ -132,7 +132,6 @@ var Active911HUDMap;
 
             if (typeof config === "object") {
                 if (config.hasOwnProperty('lat') && config.hasOwnProperty('lng')) {
-                    console.log('Updating position: ' + config.lat + ', ' + config.lng);
                     this.homeMarker.setPosition(new google.maps.LatLng(config.lat, config.lng));
                 }
 

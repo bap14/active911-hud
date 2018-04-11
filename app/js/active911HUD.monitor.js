@@ -326,7 +326,12 @@ function updateGoogleRoute(incident) {
             active911Map.drawRoute(destination);
         }
         else {
-            destination = incident.address + ' ' + incident.city + ' ' + incident.state;
+            if (incident.address.indexOf('/') !== -1) {
+                let parts = incident.address.split('/');
+                destination = parts[0].trim() + " and " + parts[1].trim();
+            } else {
+                destination = incident.address + ' ' + incident.city + ' ' + incident.state;
+            }
 
             active911Map.geocodeAddress(destination).then((result) => {
                 if (result.length > 0 && result[0].geometry && result[0].geometry.location) {
