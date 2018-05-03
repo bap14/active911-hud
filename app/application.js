@@ -11,9 +11,11 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const ipcMain = electron.ipcMain;
 const remote = electron.remote;
+const powerSaveBlocker = electron.powerSaveBlocker;
 const fs = require('graceful-fs');
 const os = require('os');
-let settingsWindow,
+let powersaveId,
+    settingsWindow,
     splashScreen,
     hudWindow,
     oauthWindow,
@@ -148,6 +150,10 @@ app.on('window-all-closed', () => {
     active911.stopActiveAlertTimer();
     active911.stopUpdatingDevices();
 
+    if (powerSaveBlocker.isStarted(powersaveId)) {
+        powerSaveBlocker.stop(powersaveId);
+    }
+
     if (process.platform !== 'darwin') {
         app.quit();
     }
@@ -155,6 +161,11 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
+    powersaveId = powerSaveBlocker.start('prevent-display-sleep');
+    if (!powerSaveBlocker.isStarted(powersaveId)) {
+        console.error('Failed to start display sleep prevention');
+        app.exit();
+    }
     createSplashScreen();
 });
 
@@ -250,6 +261,8 @@ ipcMain.on('exit-application', () => {
     if (oauthWindow) oauthWindow.close();
     if (settingsWindow) settingsWindow.close();
     if (hudWindow) hudWindow.close();
+
+    powerSaveBlocker.stop(powersaveId);
 });
 ipcMain.on('launch-google', () => {
     electron.shell.openExternal('https://console.developers.google.com/apis/credentials');

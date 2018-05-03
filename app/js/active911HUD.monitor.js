@@ -3,7 +3,7 @@
 const app = require('electron');
 const path = require('path');
 
-let active911Map, active911ResponseVocabularyModel, active911SettingsModel, mapMarkers = {}, mapInfoWindows = {};
+let active911Map, active911SettingsModel, mapMarkers = {}, mapInfoWindows = {};
 
 $('#active911\\:exit').on('click', (e) => {
     e.stopPropagation();
@@ -169,13 +169,13 @@ function initGoogleMap() {
 function removeAgedAlerts() {
     $('#active911\\:alert-list [role="alert"]').each((idx, elem) => {
         let result = active911.alerts.find((alert) => {
-            if (alert.id === elem.data('alertId')) {
+            if (alert.id === $(elem).attr('data-alert-id')) {
                 return true;
             }
             return false;
         });
 
-        if (typeof result === "undefined") {
+        if (typeof result === "undefined" || result === false) {
             $(elem).remove();
         }
     });
@@ -476,14 +476,17 @@ active911.on('alerts-updated', () => {
         {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'}
     ));
 
-    $(active911.alerts).each((i, alert) => {
-        updateAlert(alert);
-    });
+    $.when().done(
+        () => {
+            $(active911.alerts).map((i, alert) => { updateAlert(alert); });
+        }
+    ).then(() => { removeAgedAlerts(); });
+
     if (active911.getActiveAlert()) {
         showPersonnelMarkers(active911.getActiveAlert());
         addPersonnelToLists(active911.getActiveAlert());
     }
-    removeAgedAlerts();
+
 });
 
 ipcRenderer.on('oauth-update-complete', () => {

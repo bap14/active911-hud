@@ -61,7 +61,7 @@ module.exports = function (active911Settings) {
 
         return this.callApi()
             .catch((err) => {
-                console.error(err);
+                console.error('API Error: ' + err);
             })
             .then((json) => {
                 self.agency = json.agency;
@@ -75,7 +75,7 @@ module.exports = function (active911Settings) {
 
         return this.callApi('devices/' + deviceId)
             .catch((err) => {
-                console.error(err);
+                console.error('API response error: ' + err);
             })
             .then((json) => {
                 json.device.latitude = parseFloat(json.device.latitude);
@@ -98,7 +98,7 @@ module.exports = function (active911Settings) {
 
         return this.cacheAgency()
             .catch((err) => {
-                console.error(err);
+                console.error('Error caching agency: ' + err);
             })
             .then(() => {
                 let device;
@@ -106,12 +106,12 @@ module.exports = function (active911Settings) {
                     device = self.agency.devices[i];
                     self.cacheDevice(device.id)
                         .catch((err) => {
-                            console.error(err);
+                            console.error('Error caching device: ' + err);
                         });
                 }
             })
             .catch((err) => {
-                console.error(err);
+                console.error('Error caching devices: ' + err);
             });
     };
 
@@ -128,6 +128,7 @@ module.exports = function (active911Settings) {
                     'User-Agent': 'Active911-HUD / electron-' + process.versions.electron
                         + ' (' + os.type() + ' ' + os.release() + ' ' + os.arch() + ')'
                 },
+                followAllRedirects: true,
                 json: true
             };
             requestPromise(options)
@@ -263,9 +264,12 @@ module.exports = function (active911Settings) {
                 let alert = that.alerts[0], n = 0, oldDate, newDate, response, responses = {}, isNewActiveAlert;
 
                 isNewActiveAlert = (
+                    // If it's not the current active alert
                     (that.activeAlert === null || alert.id !== that.activeAlertId)
-                    // && !that.alreadyAlerted.includes(alert.id)
-                    && (new Date().getTime()) - (active911Settings.get('active911.alerts.activeAlertAge') * 60 * 60 *1000) < alert.received.getTime()
+                    // If it's not an alert that's been shown
+                    && !that.alreadyAlerted.includes(alert.id)
+                    // If it's an alert within the "active" timeframe
+                    && (new Date().getTime()) - (active911Settings.get('active911.alerts.activeAlertAge') * 60 * 1000) < alert.received.getTime()
                 );
                 if (isNewActiveAlert) {
                     /* Test for intersection routing: */
@@ -325,7 +329,7 @@ module.exports = function (active911Settings) {
 
                 that.updateAlerts()
                     .catch((err) => {
-                        console.error(err);
+                        console.error('Error updating alerts:' + err);
                     })
                     .then(() => {
                         ipcMain.emit('active911-ready');
@@ -338,7 +342,7 @@ module.exports = function (active911Settings) {
                     });
             })
             .catch((err) => {
-                console.error(err.message, err);
+                console.error('Error caching devices:' + err);
             });
     };
 
@@ -384,14 +388,19 @@ module.exports = function (active911Settings) {
                 for (let i=0; i<alerts.length; i++) {
                     promises.push(
                         that.getAlert(alerts[i].id)
+                            .catch((err) => {
+                                console.error('Error retrieving alert: ' + err);
+                            })
                             .then((response) => {
-                                response.alert.received = new Date(response.alert.received + " UTC");
-                                response.alert.sent = new Date(response.alert.sent + " UTC");
+                                if (typeof response !== "undefined") {
+                                    response.alert.received = new Date(response.alert.received + " UTC");
+                                    response.alert.sent = new Date(response.alert.sent + " UTC");
 
-                                that.alerts.push(response.alert);
+                                    that.alerts.push(response.alert);
+                                }
                             })
                             .catch((err) => {
-                                console.error(err);
+                                console.error('Uncaught alert data error: ' + err);
                             })
                     );
                 }
@@ -402,23 +411,23 @@ module.exports = function (active911Settings) {
                             return (a.received.getTime() > b.received.getTime()) ? -1 : 1;
                         });
                         that.removeAgedAlerts()
-                            .catch((e) => { console.error(e); })
+                            .catch((e) => { console.error('Error removing "aged" alerts: ' + e); })
                             .then(() => {
                                 that.setActiveAlert()
-                                    .catch((e) => { console.error(e); })
+                                    .catch((e) => { console.error('Error setting active alert: ' + e); })
                                     .then(() => {
                                         that.emit('alerts-updated');
                                         ipcMain.emit('active911-alerts-updated');
                                     });
                             });
                     })
-                    .catch((e) => { console.error(e); })
+                    .catch((e) => { console.error('Error retrieving alerts: ' + e); })
                     .then(() => {
                         that.emit('updating-alerts-end');
                     });
             })
             .catch((err) => {
-                console.error(err.message);
+                console.error('Uncaught error: ' + err);
             });
     };
 
