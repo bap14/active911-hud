@@ -77,6 +77,10 @@ module.exports = function () {
         return value === undefined ? defaultValue : value;
     };
 
+    active911Settings.prototype.getActiveAlertAge = function () {
+        return this.config.active911.alerts.activeAlertAge * 60 * 1000;
+    };
+
     active911Settings.prototype.getAlertsTimeframe = function () {
         return this.config.active911.alerts.timeFrame;
     };

@@ -182,6 +182,7 @@ ipcMain.on('show-settings-window', () => {
 });
 ipcMain.on('restart-app', () => {
     hudWindow.hide();
+    clearInterval(tokenRefreshInterval);
     createSplashScreen();
     hudWindow.close();
 });

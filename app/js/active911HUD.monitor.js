@@ -169,10 +169,7 @@ function initGoogleMap() {
 function removeAgedAlerts() {
     $('#active911\\:alert-list [role="alert"]').each((idx, elem) => {
         let result = active911.alerts.find((alert) => {
-            if (alert.id === $(elem).attr('data-alert-id')) {
-                return true;
-            }
-            return false;
+            return alert.id === $(elem).attr('data-alert-id');
         });
 
         if (typeof result === "undefined" || result === false) {
@@ -282,7 +279,7 @@ function showPersonnelMarkers(incident) {
 function updateAlert(data) {
     let alert,
         existing = true,
-        template = $('#active911\\:alert-list-template > [role="list"]').clone(),
+        template = $('#active911\\:alert-list-template > [role="alert"]').clone(),
         address = '';
 
     alert = $('#alert-' + data.id);
@@ -296,12 +293,13 @@ function updateAlert(data) {
     $('.alert-title > .number', alert).text(data.cad_code);
     $('.alert-title > .description', alert).text(data.description);
 
-    if (data.place) address += data.place + "\n";
+    if (typeof data.place !== "undefined" && data.place !== "") address += data.place + "\n";
     address += data.address;
     if (data.unit) address += " " + data.unit;
     address += "\n" + data.city + ", " + data.state;
 
-    $('.alert-description', alert).text(address);
+    $('.alert-address', alert).text(address);
+    $('.alert-description', alert).text(data.details);
 
     $('.alert-date', alert).text(
         data.received.toLocaleDateString(
