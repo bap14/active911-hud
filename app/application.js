@@ -253,6 +253,10 @@ ipcMain.on('active911-alerts-updated', () => {
 });
 ipcMain.on('active911-new-alert', () => {
     hudWindow.send('new-alert');
+    hudWindow.flashFrame(true);
+    setTimeout(() => {
+        hudWindow.flashFrame(false);
+    }, 8000);
 });
 ipcMain.on('exit-application', () => {
     active911.stopActiveAlertTimer();

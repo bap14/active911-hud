@@ -169,7 +169,7 @@ function initGoogleMap() {
 function removeAgedAlerts() {
     $('#active911\\:alert-list [role="alert"]').each((idx, elem) => {
         let result = active911.alerts.find((alert) => {
-            return alert.id === $(elem).attr('data-alert-id');
+            return alert.id.toString() === $(elem).data('alert-id').toString();
         });
 
         if (typeof result === "undefined" || result === false) {
@@ -491,6 +491,8 @@ ipcRenderer.on('oauth-update-complete', () => {
     active911.startup();
 });
 
+let gMapInitialized = initGoogleMap();
+
 ipcRenderer.on('agency-updated', () => {
     $('#active911\\:agency').html(active911.getAgency().name);
 
@@ -501,7 +503,7 @@ ipcRenderer.on('agency-updated', () => {
 });
 
 $(document).ready(() => {
-    let gMapInitialized;
+
     updateTimer();
 
     active911.on('active-alert-timer-start', showActiveAlert);
@@ -613,7 +615,7 @@ $(document).ready(() => {
         $(elem).addClass('btn-light');
     });
 
-    gMapInitialized = initGoogleMap();
+
 
     active911.startup();
 

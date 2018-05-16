@@ -39,7 +39,8 @@ module.exports = function () {
                 alerts: {
                     activeAlertAge: 15,
                     clearAfter: 30,
-                    timeFrame: 30
+                    timeFrame: 30,
+                    updateInterval: 10
                 },
                 showWatchers: false,
                 responseVocabulary: []

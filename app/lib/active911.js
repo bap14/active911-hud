@@ -238,18 +238,15 @@ module.exports = function (active911Settings) {
     Active911.prototype.removeAgedAlerts = function () {
         let that = this;
         return new Promise((resolve, reject) => {
-            let alert, n = 0, alertAge = 0;
+            let alert, n = that.alerts.length - 1, alertAge = 0;
 
-            for (n; n < that.alerts.length; n++) {
+            for (n; n >= 0; n--) {
                 alert = that.alerts[n];
 
                 alertAge = Math.round(((new Date().getTime() - alert.received.getTime()) / 1000) / 60);
 
                 if (alertAge >= active911Settings.get('active911.alerts.clearAfter')) {
-                    let index = that.alerts.indexOf(alert);
-                    if (index > -1) {
-                        that.alerts = that.alerts.splice(index, 1);
-                    }
+                    that.alerts.splice(n, 1);
                 }
             }
 
@@ -330,7 +327,7 @@ module.exports = function (active911Settings) {
                         // Get alerts every 30-seconds
                         that.alertUpdater = setInterval((() => {
                             this.updateAlerts();
-                        }).bind(this), 30 * 1000);
+                        }).bind(this), active911Settings.get('active911.alerts.updateInterval') * 1000);
                         // Cache device data every 2 minutes
                         that.updateDevicesEvery(2 * 60);
                     });
@@ -383,7 +380,7 @@ module.exports = function (active911Settings) {
                     promises.push(
                         that.getAlert(alerts[i].id)
                             .catch((err) => {
-                                console.error('Error retrieving alert: ' + err);
+                                throw 'Error retrieving alert: ' + err;
                             })
                             .then((response) => {
                                 if (typeof response !== "undefined") {
@@ -394,7 +391,7 @@ module.exports = function (active911Settings) {
                                 }
                             })
                             .catch((err) => {
-                                console.error('Uncaught alert data error: ' + err);
+                                throw 'Uncaught alert data error: ' + err;
                             })
                     );
                 }
@@ -421,7 +418,7 @@ module.exports = function (active911Settings) {
                     });
             })
             .catch((err) => {
-                console.error('Uncaught error: ' + err);
+                console.error(err);
             });
     };
 
