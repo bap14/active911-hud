@@ -26,8 +26,7 @@
       "icon": "build/icons/mac/active911.icns"
     },
     "dmg": {
-      "background": "",
-      "backgroundColor": "#778899"
+      "background": "build/icons/png/256x256.png"
     }
   },
   "scripts": {

@@ -76,9 +76,12 @@ var Active911HUDMap;
                 provideRouteAlternatives: false
             };
             var self = this;
-            let directions = new google.maps.DirectionsService();
+            let directions = new google.maps.DirectionsService(), preserveViewport=false;
             directions.route(directionReq, function (result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
+                    if (result.routes[0].legs[0].distance.value <= 1600) preserveViewport = true;
+
+                    self.directionsRenderer.setOptions({ preserveViewport: preserveViewport });
                     self.directionsRenderer.setDirections(result);
                 }
                 else {
@@ -106,6 +109,7 @@ var Active911HUDMap;
             this.geocoder = new google.maps.Geocoder();
             this.directionsRenderer = new google.maps.DirectionsRenderer();
             this.directionsRenderer.setMap(this.googleMap);
+
 
             this.homeMarker = new google.maps.Marker({
                 position: this.mapOptions.home,
