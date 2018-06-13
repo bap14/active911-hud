@@ -16,7 +16,10 @@
     },
     "nsis": {
       "installerIcon": "build/icons/win/active911.ico",
-      "uninstallerIcon": "build/icons/win/active911.ico"
+      "uninstallerIcon": "build/icons/win/active911.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Active911 HUD"
     },
     "mac": {
       "target": "dmg",
